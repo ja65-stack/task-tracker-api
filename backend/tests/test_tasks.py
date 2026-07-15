@@ -139,6 +139,30 @@ def test_patch_same_status_returns_422(client, created_task):
     assert response.status_code == 422
 
 
+def test_patch_task_alias_updates_task(client, created_task):
+    task_id = created_task["id"]
+
+    response = client.patch(f"/task/{task_id}", json={"title": "updated title"})
+
+    assert response.status_code == 200
+    assert response.json()["title"] == "updated title"
+
+
+def test_cors_preflight_allows_patch_from_frontend_origin(client):
+    response = client.options(
+        "/tasks/123",
+        headers={
+            "Origin": "http://127.0.0.1:8001",
+            "Access-Control-Request-Method": "PATCH",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://127.0.0.1:8001"
+    assert "PATCH" in response.headers["access-control-allow-methods"]
+
+
 def test_delete_existing_returns_204_no_body(client, created_task):
     response = client.delete(f"/tasks/{created_task['id']}")
 
