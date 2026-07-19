@@ -6,17 +6,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import storage
 from app.business_rules import validate_status_transition
 from app.models import TaskCreate, TaskPriority, TaskResponse, TaskStatus, TaskUpdate
+from app.routes.comments import router as comments_router
 
 
 app = FastAPI(
     title="Task Tracker API",
     description=(
-        "Task Tracker REST API learning project. "
-        "Comment models and JSON storage are scaffolded; "
-        "comment HTTP routes will be added in a later step."
+        "Task Tracker REST API learning project with task CRUD "
+        "and task comment list/add/delete endpoints."
     ),
     version="0.1.0",
 )
+
+app.include_router(comments_router)
 
 
 origins = [

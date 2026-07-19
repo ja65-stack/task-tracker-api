@@ -13,7 +13,7 @@ backend/
 │   ├── comment_storage.py      # comments.json helpers
 │   ├── routes/
 │   │   ├── tasks.py
-│   │   └── comments.py         # router stub (no comment endpoints yet)
+│   │   └── comments.py         # list/add/delete comment routes
 │   ├── services/
 │   │   ├── task_service.py
 │   │   └── comment_service.py  # list/add/delete helpers for future routes

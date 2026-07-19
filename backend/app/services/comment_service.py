@@ -1,8 +1,4 @@
-"""Comment business helpers used by future comment routes.
-
-HTTP endpoints are not registered yet; this module prepares list/add/delete
-orchestration against task + comment JSON storage.
-"""
+"""Comment business helpers used by comment routes."""
 
 from __future__ import annotations
 
