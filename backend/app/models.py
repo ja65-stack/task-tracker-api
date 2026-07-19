@@ -81,3 +81,40 @@ class TaskUpdate(BaseModel):
         if value is None:
             return value
         return _normalize_title(value)
+
+
+def _normalize_comment_text(value: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError("Comment text is required and cannot be blank")
+    return value
+
+
+class CommentCreate(BaseModel):
+    """Client payload for creating a comment. text is the only client field."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    text: str = Field(...)
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        return _normalize_comment_text(value)
+
+
+class Comment(BaseModel):
+    """Persisted comment entity. id, task_id, and created_at are server-owned."""
+
+    id: int
+    task_id: int
+    text: str = Field(...)
+    created_at: datetime
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        return _normalize_comment_text(value)
+
+
+CommentResponse = Comment

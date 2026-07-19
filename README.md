@@ -17,26 +17,25 @@ The current implementation provides:
 backend/
 ├── app/
 │   ├── __init__.py
-│   ├── main.py              # FastAPI app + CRUD routes
-│   ├── models.py            # Pydantic v2 Task models
-│   ├── storage.py           # JSON file CRUD helpers
-│   ├── business_rules.py    # Status transition rules
+│   ├── main.py                 # FastAPI app + task CRUD routes
+│   ├── models.py               # Task + Comment Pydantic models
+│   ├── storage.py              # tasks.json helpers
+│   ├── comment_storage.py      # comments.json helpers
+│   ├── business_rules.py
 │   ├── schemas.py
 │   ├── validators.py
 │   ├── data/
-│   │   └── tasks.json       # Persisted tasks
+│   │   ├── tasks.json
+│   │   └── comments.json
 │   ├── routes/
-│   │   └── tasks.py
+│   │   ├── tasks.py
+│   │   └── comments.py         # stub (comment HTTP routes not wired yet)
 │   └── services/
-│       └── task_service.py
+│       ├── task_service.py
+│       └── comment_service.py
 ├── frontend/
 │   └── index.html
 ├── tests/
-│   ├── conftest.py
-│   ├── test_health.py
-│   ├── test_models.py
-│   ├── test_storage.py
-│   └── test_tasks.py
 └── requirements.txt
 ```
 

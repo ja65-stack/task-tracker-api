@@ -10,9 +10,14 @@ from app.models import TaskCreate, TaskPriority, TaskResponse, TaskStatus, TaskU
 
 app = FastAPI(
     title="Task Tracker API",
-    description="Module 1 Task Tracker REST API learning project",
+    description=(
+        "Task Tracker REST API learning project. "
+        "Comment models and JSON storage are scaffolded; "
+        "comment HTTP routes will be added in a later step."
+    ),
     version="0.1.0",
 )
+
 
 origins = [
     "http://localhost:8001",
