@@ -29,7 +29,7 @@ backend/
 │   │   └── comments.json
 │   ├── routes/
 │   │   ├── tasks.py
-│   │   └── comments.py         # stub (comment HTTP routes not wired yet)
+│   │   └── comments.py         # list/add/delete comment routes
 │   └── services/
 │       ├── task_service.py
 │       └── comment_service.py
