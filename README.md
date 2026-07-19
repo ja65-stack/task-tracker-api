@@ -15,15 +15,36 @@ The current implementation provides:
 
 ```
 backend/
-  app/
-    models.py          # Pydantic v2 task models
-    storage.py         # JSON file CRUD helpers
-    data/tasks.json    # Persisted tasks
-    main.py            # FastAPI app + routes
-    business_rules.py  # Status transition rules
-  frontend/
-  tests/
+├── app/
+│   ├── __init__.py
+│   ├── main.py              # FastAPI app + CRUD routes
+│   ├── models.py            # Pydantic v2 Task models
+│   ├── storage.py           # JSON file CRUD helpers
+│   ├── business_rules.py    # Status transition rules
+│   ├── schemas.py
+│   ├── validators.py
+│   ├── data/
+│   │   └── tasks.json       # Persisted tasks
+│   ├── routes/
+│   │   └── tasks.py
+│   └── services/
+│       └── task_service.py
+├── frontend/
+│   └── index.html
+├── tests/
+│   ├── conftest.py
+│   ├── test_health.py
+│   ├── test_models.py
+│   ├── test_storage.py
+│   └── test_tasks.py
+└── requirements.txt
 ```
+
+### Viewing folders in Cursor Explorer
+
+- **Agents Window:** press `Ctrl+G` (Windows/Linux) or `Cmd+G` (Mac) to open the file tree.
+- **Classic IDE:** `Ctrl/Cmd+Shift+P` → **Open IDE**, then use the left Explorer panel.
+- If a folder looks empty, expand the repo root again or reload the window (`Developer: Reload Window`).
 
 ## Run
 
