@@ -6,7 +6,11 @@ from app.main import app
 
 
 @pytest.fixture(autouse=True)
-def _reset_storage():
+def _reset_storage(tmp_path, monkeypatch):
+    tasks_file = tmp_path / "tasks.json"
+    tasks_file.write_text("[]", encoding="utf-8")
+    monkeypatch.setattr(storage, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(storage, "TASKS_FILE", tasks_file)
     storage._reset()
     yield
     storage._reset()

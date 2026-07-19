@@ -21,7 +21,7 @@ def test_task_create_rejects_title_over_200_characters():
 
 def test_task_create_defaults():
     task = TaskCreate(title="Write tests")
-    assert task.description == ""
+    assert task.description is None
     assert task.status == TaskStatus.TODO
     assert task.priority == TaskPriority.MEDIUM
     assert task.assignee is None
