@@ -275,6 +275,74 @@
       font-size: 0.92rem;
     }
 
+    .comments-section {
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid #e5e7eb;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .comments-section[hidden] {
+      display: none;
+    }
+
+    .comments-section h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .comments-status {
+      margin: 0;
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .comments-status.is-error {
+      color: #b91c1c;
+    }
+
+    .comments-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+      max-height: 12rem;
+      overflow-y: auto;
+    }
+
+    .comments-list li {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.7rem 0.8rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .comments-list .comment-text {
+      margin: 0;
+      color: #111827;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .comments-list .comment-meta {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+
+    .comments-empty {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 960px) {
       .board {
         grid-template-columns: 1fr;
@@ -381,6 +449,13 @@
           <button class="primary" type="submit">Save</button>
         </div>
       </form>
+
+      <section class="comments-section" id="taskCommentsSection" hidden>
+        <h3>Comments</h3>
+        <p class="comments-status" id="taskCommentsStatus" aria-live="polite"></p>
+        <ul class="comments-list" id="taskCommentsList"></ul>
+        <p class="comments-empty" id="taskCommentsEmpty" hidden>No comments yet.</p>
+      </section>
     </div>
   </div>
 
@@ -409,6 +484,10 @@
     const taskEditPriority = document.getElementById('taskEditPriority');
     const taskEditAssignee = document.getElementById('taskEditAssignee');
     const taskEditError = document.getElementById('taskEditError');
+    const taskCommentsSection = document.getElementById('taskCommentsSection');
+    const taskCommentsStatus = document.getElementById('taskCommentsStatus');
+    const taskCommentsList = document.getElementById('taskCommentsList');
+    const taskCommentsEmpty = document.getElementById('taskCommentsEmpty');
     let activeTaskId = null;
 
     const boardWrapper = document.querySelector('.board-wrapper');
@@ -523,6 +602,78 @@
       return placeholder;
     }
 
+    function clearCommentsPanel() {
+      taskCommentsList.innerHTML = '';
+      taskCommentsStatus.textContent = '';
+      taskCommentsStatus.classList.remove('is-error');
+      taskCommentsEmpty.hidden = true;
+    }
+
+    function renderComments(comments) {
+      taskCommentsList.innerHTML = '';
+      taskCommentsStatus.classList.remove('is-error');
+
+      if (!comments.length) {
+        taskCommentsStatus.textContent = '';
+        taskCommentsEmpty.hidden = false;
+        return;
+      }
+
+      taskCommentsEmpty.hidden = true;
+      taskCommentsStatus.textContent = `${comments.length} comment${comments.length === 1 ? '' : 's'}`;
+
+      comments.forEach(comment => {
+        const item = document.createElement('li');
+        item.dataset.commentId = comment.id;
+
+        const text = document.createElement('p');
+        text.className = 'comment-text';
+        text.textContent = comment.text ?? '';
+        item.appendChild(text);
+
+        const meta = document.createElement('p');
+        meta.className = 'comment-meta';
+        const createdAt = comment.created_at
+          ? new Date(comment.created_at).toLocaleString()
+          : '';
+        meta.textContent = createdAt ? `Comment #${comment.id} · ${createdAt}` : `Comment #${comment.id}`;
+        item.appendChild(meta);
+
+        taskCommentsList.appendChild(item);
+      });
+    }
+
+    async function loadTaskComments(taskId) {
+      clearCommentsPanel();
+      taskCommentsSection.hidden = false;
+      taskCommentsStatus.textContent = 'Loading comments…';
+
+      try {
+        const response = await fetch(
+          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`
+        );
+
+        if (response.status === 404) {
+          taskCommentsStatus.textContent = 'Task not found for comments.';
+          taskCommentsStatus.classList.add('is-error');
+          return;
+        }
+
+        if (!response.ok) {
+          taskCommentsStatus.textContent = 'Unable to load comments.';
+          taskCommentsStatus.classList.add('is-error');
+          return;
+        }
+
+        const comments = await response.json();
+        renderComments(Array.isArray(comments) ? comments : []);
+      } catch (error) {
+        taskCommentsStatus.textContent = 'Unable to load comments right now.';
+        taskCommentsStatus.classList.add('is-error');
+        console.error(error);
+      }
+    }
+
     function openNewTaskModal() {
       activeTaskId = null;
       taskEditId.value = '';
@@ -532,6 +683,8 @@
       taskEditPriority.value = 'Medium';
       taskEditAssignee.value = '';
       taskEditError.textContent = '';
+      clearCommentsPanel();
+      taskCommentsSection.hidden = true;
       document.getElementById('taskEditModalTitle').textContent = 'New task';
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
@@ -551,6 +704,7 @@
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       taskEditTitle.focus();
+      loadTaskComments(task.id);
     }
 
     function closeTaskModal() {
@@ -560,6 +714,8 @@
       taskEditForm.reset();
       taskEditId.value = '';
       activeTaskId = null;
+      clearCommentsPanel();
+      taskCommentsSection.hidden = true;
     }
 
     function getErrorMessage(errorData) {
