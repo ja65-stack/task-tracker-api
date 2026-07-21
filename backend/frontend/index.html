@@ -462,7 +462,7 @@
   </div>
 
   <script>
-    const baseUrl = 'http://localhost:8000';
+    const baseUrl = 'http://127.0.0.1:8000';
     let tasks = [];
 
     const columns = {
@@ -703,6 +703,9 @@
       taskEditAssignee.value = task.assignee ?? '';
       taskEditError.textContent = '';
       document.getElementById('taskEditModalTitle').textContent = 'Edit task';
+      clearCommentsPanel();
+      taskCommentsSection.hidden = false;
+      taskCommentsStatus.textContent = 'Loading comments…';
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       taskEditTitle.focus();
