@@ -325,12 +325,37 @@
       gap: 0.35rem;
     }
 
+    .comments-list .comment-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
     .comments-list .comment-text {
       margin: 0;
       color: #111827;
       font-size: 0.95rem;
       line-height: 1.45;
       white-space: pre-wrap;
+      flex: 1;
+    }
+
+    .comments-list .comment-delete {
+      border: none;
+      border-radius: 999px;
+      padding: 0.35rem 0.7rem;
+      background: #fee2e2;
+      color: #991b1b;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .comments-list .comment-delete:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
     }
 
     .comments-list .comment-meta {
@@ -697,10 +722,24 @@
         const item = document.createElement('li');
         item.dataset.commentId = comment.id;
 
+        const header = document.createElement('div');
+        header.className = 'comment-header';
+
         const text = document.createElement('p');
         text.className = 'comment-text';
         text.textContent = comment.text ?? '';
-        item.appendChild(text);
+        header.appendChild(text);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'comment-delete';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => {
+          deleteTaskComment(comment.id, deleteButton);
+        });
+        header.appendChild(deleteButton);
+
+        item.appendChild(header);
 
         const meta = document.createElement('p');
         meta.className = 'comment-meta';
@@ -715,8 +754,10 @@
     }
 
     async function loadTaskComments(taskId) {
-      clearCommentsPanel();
+      taskCommentsList.innerHTML = '';
+      taskCommentsEmpty.hidden = true;
       taskCommentsSection.hidden = false;
+      taskCommentsStatus.classList.remove('is-error');
       taskCommentsStatus.textContent = 'Loading comments…';
 
       try {
@@ -742,6 +783,49 @@
         taskCommentsStatus.textContent = 'Unable to load comments right now.';
         taskCommentsStatus.classList.add('is-error');
         console.error(error);
+      }
+    }
+
+    async function deleteTaskComment(commentId, deleteButton) {
+      const taskId = activeTaskId ?? taskEditId.value;
+      if (!taskId) {
+        taskCommentError.textContent = 'Task not found for comments.';
+        return;
+      }
+
+      taskCommentError.textContent = '';
+      if (deleteButton) {
+        deleteButton.disabled = true;
+      }
+
+      try {
+        const response = await fetch(
+          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments/${encodeURIComponent(commentId)}`,
+          {
+            method: 'DELETE',
+          }
+        );
+
+        if (response.status === 404) {
+          taskCommentError.textContent = 'Comment not found.';
+          await loadTaskComments(taskId);
+          return;
+        }
+
+        if (!response.ok) {
+          taskCommentError.textContent = 'Unable to delete comment.';
+          return;
+        }
+
+        taskCommentError.textContent = '';
+        await loadTaskComments(taskId);
+      } catch (error) {
+        taskCommentError.textContent = 'Unable to delete comment right now.';
+        console.error(error);
+      } finally {
+        if (deleteButton) {
+          deleteButton.disabled = false;
+        }
       }
     }
 
