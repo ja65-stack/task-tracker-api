@@ -134,6 +134,11 @@
       color: #3730a3;
     }
 
+    .badge.comments {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
     .card button {
       border: none;
       border-radius: 12px;
@@ -551,6 +556,7 @@
   <script>
     const baseUrl = 'http://127.0.0.1:8000';
     let tasks = [];
+    const commentCounts = {};
 
     const columns = {
       ToDo: document.querySelector('.column[data-status="ToDo"] .cards'),
@@ -646,6 +652,46 @@
       Low: 2,
     };
 
+    function formatCommentCount(count) {
+      const safeCount = Number.isFinite(count) ? count : 0;
+      return `${safeCount} comment${safeCount === 1 ? '' : 's'}`;
+    }
+
+    function setCardCommentCount(taskId, count) {
+      commentCounts[taskId] = count;
+      const card = document.querySelector(`.card[data-task-id="${taskId}"]`);
+      if (!card) {
+        return;
+      }
+
+      const badge = card.querySelector('.badge.comments');
+      if (badge) {
+        badge.textContent = formatCommentCount(count);
+      }
+    }
+
+    async function refreshCommentCounts() {
+      const taskIds = tasks.map(task => task.id);
+      await Promise.all(
+        taskIds.map(async taskId => {
+          try {
+            const response = await fetch(
+              `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`
+            );
+            if (!response.ok) {
+              return;
+            }
+
+            const comments = await response.json();
+            const count = Array.isArray(comments) ? comments.length : 0;
+            setCardCommentCount(taskId, count);
+          } catch (error) {
+            console.error(error);
+          }
+        })
+      );
+    }
+
     function createCard(task) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -674,6 +720,14 @@
       assignee.className = 'badge assignee';
       assignee.textContent = task.assignee ? task.assignee : 'Unassigned';
       meta.appendChild(assignee);
+
+      const commentsBadge = document.createElement('span');
+      commentsBadge.className = 'badge comments';
+      const knownCount = commentCounts[task.id];
+      commentsBadge.textContent = Number.isFinite(knownCount)
+        ? formatCommentCount(knownCount)
+        : '…';
+      meta.appendChild(commentsBadge);
 
       const editButton = document.createElement('button');
       editButton.type = 'button';
@@ -712,11 +766,17 @@
       if (!comments.length) {
         taskCommentsStatus.textContent = '';
         taskCommentsEmpty.hidden = false;
+        if (activeTaskId != null) {
+          setCardCommentCount(activeTaskId, 0);
+        }
         return;
       }
 
       taskCommentsEmpty.hidden = true;
       taskCommentsStatus.textContent = `${comments.length} comment${comments.length === 1 ? '' : 's'}`;
+      if (activeTaskId != null) {
+        setCardCommentCount(activeTaskId, comments.length);
+      }
 
       comments.forEach(comment => {
         const item = document.createElement('li');
@@ -1108,6 +1168,7 @@
       renderColumn('ToDo', grouped.ToDo);
       renderColumn('InProgress', grouped.InProgress);
       renderColumn('Done', grouped.Done);
+      refreshCommentCounts();
     }
 
     function patchTaskStatus(taskId, newStatus) {
