@@ -345,6 +345,58 @@
       font-size: 0.9rem;
     }
 
+    .comment-form {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .comment-form label {
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      font: inherit;
+      min-height: 4.2rem;
+      resize: vertical;
+    }
+
+    .comment-form-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .comment-form-actions button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.55rem 0.95rem;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .comment-form-actions button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .comment-form-error {
+      min-height: 1.1rem;
+      margin: 0;
+      color: #b91c1c;
+      font-size: 0.88rem;
+    }
+
     @media (max-width: 960px) {
       .board {
         grid-template-columns: 1fr;
@@ -457,6 +509,16 @@
         <p class="comments-status" id="taskCommentsStatus" aria-live="polite"></p>
         <ul class="comments-list" id="taskCommentsList"></ul>
         <p class="comments-empty" id="taskCommentsEmpty" hidden>No comments yet.</p>
+        <form id="taskCommentForm" class="comment-form">
+          <label>
+            Add a comment
+            <textarea id="taskCommentText" name="text" rows="3" placeholder="Write a short note…"></textarea>
+          </label>
+          <p class="comment-form-error" id="taskCommentError" role="alert"></p>
+          <div class="comment-form-actions">
+            <button id="taskCommentSubmit" type="submit">Add comment</button>
+          </div>
+        </form>
       </section>
     </div>
   </div>
@@ -490,6 +552,10 @@
     const taskCommentsStatus = document.getElementById('taskCommentsStatus');
     const taskCommentsList = document.getElementById('taskCommentsList');
     const taskCommentsEmpty = document.getElementById('taskCommentsEmpty');
+    const taskCommentForm = document.getElementById('taskCommentForm');
+    const taskCommentText = document.getElementById('taskCommentText');
+    const taskCommentError = document.getElementById('taskCommentError');
+    const taskCommentSubmit = document.getElementById('taskCommentSubmit');
     let activeTaskId = null;
 
     const boardWrapper = document.querySelector('.board-wrapper');
@@ -609,6 +675,9 @@
       taskCommentsStatus.textContent = '';
       taskCommentsStatus.classList.remove('is-error');
       taskCommentsEmpty.hidden = true;
+      taskCommentText.value = '';
+      taskCommentError.textContent = '';
+      taskCommentSubmit.disabled = false;
     }
 
     function renderComments(comments) {
@@ -673,6 +742,71 @@
         taskCommentsStatus.textContent = 'Unable to load comments right now.';
         taskCommentsStatus.classList.add('is-error');
         console.error(error);
+      }
+    }
+
+    async function addTaskComment(event) {
+      event.preventDefault();
+
+      const taskId = activeTaskId ?? taskEditId.value;
+      if (!taskId) {
+        taskCommentError.textContent = 'Save the task before adding comments.';
+        return;
+      }
+
+      const trimmedText = taskCommentText.value.trim();
+      if (!trimmedText) {
+        taskCommentError.textContent = 'Comment text cannot be blank.';
+        taskCommentText.focus();
+        return;
+      }
+
+      taskCommentError.textContent = '';
+      taskCommentSubmit.disabled = true;
+
+      try {
+        const response = await fetch(
+          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: trimmedText }),
+          }
+        );
+
+        if (response.status === 422) {
+          let message = 'Comment text cannot be blank.';
+          try {
+            const errorData = await response.json();
+            message = getErrorMessage(errorData) || message;
+          } catch {
+            // keep default blank-text message
+          }
+          taskCommentError.textContent = message;
+          taskCommentText.focus();
+          return;
+        }
+
+        if (response.status === 404) {
+          taskCommentError.textContent = 'Task not found for comments.';
+          return;
+        }
+
+        if (!response.ok) {
+          taskCommentError.textContent = 'Unable to add comment.';
+          return;
+        }
+
+        taskCommentText.value = '';
+        taskCommentError.textContent = '';
+        await loadTaskComments(taskId);
+      } catch (error) {
+        taskCommentError.textContent = 'Unable to add comment right now.';
+        console.error(error);
+      } finally {
+        taskCommentSubmit.disabled = false;
       }
     }
 
@@ -1009,6 +1143,7 @@
     });
 
     taskEditForm.addEventListener('submit', saveTaskEdit);
+    taskCommentForm.addEventListener('submit', addTaskComment);
 
     document.querySelectorAll('[data-action="close"], [data-action="cancel"]').forEach(control => {
       control.addEventListener('click', () => {
