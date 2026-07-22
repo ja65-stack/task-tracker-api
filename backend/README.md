@@ -1,36 +1,42 @@
 # Backend
 
-FastAPI Task Tracker API lives in this folder.
+FastAPI Task Tracker API lives in this folder (branch `Mid-Course-Project`).
 
-## Folder structure (comments skeleton)
+## How to run
 
-```
-backend/
-├── app/
-│   ├── main.py                 # FastAPI app (task routes live here today)
-│   ├── models.py               # Task + Comment Pydantic models
-│   ├── storage.py              # tasks.json helpers
-│   ├── comment_storage.py      # comments.json helpers
-│   ├── routes/
-│   │   ├── tasks.py
-│   │   └── comments.py         # list/add/delete comment routes
-│   ├── services/
-│   │   ├── task_service.py
-│   │   └── comment_service.py  # list/add/delete helpers for future routes
-│   └── data/
-│       ├── tasks.json
-│       └── comments.json
-├── frontend/
-├── tests/
-└── requirements.txt
-```
-
-## Run from this folder
+### Backend
 
 ```bash
-pip install -r requirements.txt
+py -m pip install -r requirements.txt
 py -m uvicorn app.main:app --reload
+```
+
+- Docs: http://127.0.0.1:8000/docs
+- Health: http://127.0.0.1:8000/health
+
+### Frontend
+
+In a second terminal:
+
+```bash
+cd frontend
+py -m http.server 8001 --bind 127.0.0.1
+```
+
+Open http://127.0.0.1:8001/
+
+### Tests
+
+```bash
+py -m pytest tests/ -q
+```
+
+Comment baseline:
+
+```bash
+py -m pytest tests/test_comments_baseline.py -v
 ```
 
 If you pin versions in `requirements.txt`, verify installed versions with `pip freeze` after installation.
 
+See the root `README.md` for the full project run guide.
