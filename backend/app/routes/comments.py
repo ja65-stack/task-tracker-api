@@ -9,6 +9,13 @@ from app.services.comment_service import CommentNotFoundError, TaskNotFoundError
 router = APIRouter(tags=["comments"])
 
 
+def _not_found(exc: Exception) -> HTTPException:
+    return HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=str(exc),
+    )
+
+
 @router.get(
     "/tasks/{task_id}/comments",
     response_model=list[CommentResponse],
@@ -17,10 +24,7 @@ def list_task_comments(task_id: int) -> list[CommentResponse]:
     try:
         return comment_service.list_comments(task_id)
     except TaskNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
+        raise _not_found(exc) from exc
 
 
 @router.post(
@@ -32,10 +36,7 @@ def create_task_comment(task_id: int, payload: CommentCreate) -> CommentResponse
     try:
         return comment_service.add_comment(task_id, payload)
     except TaskNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
+        raise _not_found(exc) from exc
 
 
 @router.delete(
@@ -45,13 +46,5 @@ def create_task_comment(task_id: int, payload: CommentCreate) -> CommentResponse
 def delete_task_comment(task_id: int, comment_id: int) -> None:
     try:
         comment_service.remove_comment(task_id, comment_id)
-    except TaskNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-    except CommentNotFoundError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
+    except (TaskNotFoundError, CommentNotFoundError) as exc:
+        raise _not_found(exc) from exc

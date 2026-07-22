@@ -657,6 +657,33 @@
       return `${safeCount} comment${safeCount === 1 ? '' : 's'}`;
     }
 
+    function commentsCollectionUrl(taskId) {
+      return `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`;
+    }
+
+    function commentItemUrl(taskId, commentId) {
+      return `${commentsCollectionUrl(taskId)}/${encodeURIComponent(commentId)}`;
+    }
+
+    function getActiveTaskId() {
+      return activeTaskId ?? taskEditId.value;
+    }
+
+    function setCommentsStatusMessage(message, isError = false) {
+      taskCommentsStatus.textContent = message;
+      taskCommentsStatus.classList.toggle('is-error', Boolean(isError));
+    }
+
+    function setCommentFormError(message) {
+      taskCommentError.textContent = message;
+    }
+
+    function syncActiveTaskCommentCount(count) {
+      if (activeTaskId != null) {
+        setCardCommentCount(activeTaskId, count);
+      }
+    }
+
     function setCardCommentCount(taskId, count) {
       commentCounts[taskId] = count;
       const card = document.querySelector(`.card[data-task-id="${taskId}"]`);
@@ -670,14 +697,17 @@
       }
     }
 
+    async function fetchTaskComments(taskId) {
+      const response = await fetch(commentsCollectionUrl(taskId));
+      return response;
+    }
+
     async function refreshCommentCounts() {
       const taskIds = tasks.map(task => task.id);
       await Promise.all(
         taskIds.map(async taskId => {
           try {
-            const response = await fetch(
-              `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`
-            );
+            const response = await fetchTaskComments(taskId);
             if (!response.ok) {
               return;
             }
@@ -751,12 +781,50 @@
 
     function clearCommentsPanel() {
       taskCommentsList.innerHTML = '';
-      taskCommentsStatus.textContent = '';
-      taskCommentsStatus.classList.remove('is-error');
+      setCommentsStatusMessage('');
       taskCommentsEmpty.hidden = true;
       taskCommentText.value = '';
-      taskCommentError.textContent = '';
+      setCommentFormError('');
       taskCommentSubmit.disabled = false;
+    }
+
+    function formatCommentMeta(comment) {
+      const createdAt = comment.created_at
+        ? new Date(comment.created_at).toLocaleString()
+        : '';
+      return createdAt
+        ? `Comment #${comment.id} · ${createdAt}`
+        : `Comment #${comment.id}`;
+    }
+
+    function createCommentListItem(comment) {
+      const item = document.createElement('li');
+      item.dataset.commentId = comment.id;
+
+      const header = document.createElement('div');
+      header.className = 'comment-header';
+
+      const text = document.createElement('p');
+      text.className = 'comment-text';
+      text.textContent = comment.text ?? '';
+      header.appendChild(text);
+
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'comment-delete';
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => {
+        deleteTaskComment(comment.id, deleteButton);
+      });
+      header.appendChild(deleteButton);
+      item.appendChild(header);
+
+      const meta = document.createElement('p');
+      meta.className = 'comment-meta';
+      meta.textContent = formatCommentMeta(comment);
+      item.appendChild(meta);
+
+      return item;
     }
 
     function renderComments(comments) {
@@ -764,52 +832,18 @@
       taskCommentsStatus.classList.remove('is-error');
 
       if (!comments.length) {
-        taskCommentsStatus.textContent = '';
+        setCommentsStatusMessage('');
         taskCommentsEmpty.hidden = false;
-        if (activeTaskId != null) {
-          setCardCommentCount(activeTaskId, 0);
-        }
+        syncActiveTaskCommentCount(0);
         return;
       }
 
       taskCommentsEmpty.hidden = true;
-      taskCommentsStatus.textContent = `${comments.length} comment${comments.length === 1 ? '' : 's'}`;
-      if (activeTaskId != null) {
-        setCardCommentCount(activeTaskId, comments.length);
-      }
+      setCommentsStatusMessage(formatCommentCount(comments.length));
+      syncActiveTaskCommentCount(comments.length);
 
       comments.forEach(comment => {
-        const item = document.createElement('li');
-        item.dataset.commentId = comment.id;
-
-        const header = document.createElement('div');
-        header.className = 'comment-header';
-
-        const text = document.createElement('p');
-        text.className = 'comment-text';
-        text.textContent = comment.text ?? '';
-        header.appendChild(text);
-
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'comment-delete';
-        deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', () => {
-          deleteTaskComment(comment.id, deleteButton);
-        });
-        header.appendChild(deleteButton);
-
-        item.appendChild(header);
-
-        const meta = document.createElement('p');
-        meta.className = 'comment-meta';
-        const createdAt = comment.created_at
-          ? new Date(comment.created_at).toLocaleString()
-          : '';
-        meta.textContent = createdAt ? `Comment #${comment.id} · ${createdAt}` : `Comment #${comment.id}`;
-        item.appendChild(meta);
-
-        taskCommentsList.appendChild(item);
+        taskCommentsList.appendChild(createCommentListItem(comment));
       });
     }
 
@@ -817,70 +851,61 @@
       taskCommentsList.innerHTML = '';
       taskCommentsEmpty.hidden = true;
       taskCommentsSection.hidden = false;
-      taskCommentsStatus.classList.remove('is-error');
-      taskCommentsStatus.textContent = 'Loading comments…';
+      setCommentsStatusMessage('Loading comments…');
 
       try {
-        const response = await fetch(
-          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`
-        );
+        const response = await fetchTaskComments(taskId);
 
         if (response.status === 404) {
-          taskCommentsStatus.textContent = 'Task not found for comments.';
-          taskCommentsStatus.classList.add('is-error');
+          setCommentsStatusMessage('Task not found for comments.', true);
           return;
         }
 
         if (!response.ok) {
-          taskCommentsStatus.textContent = 'Unable to load comments.';
-          taskCommentsStatus.classList.add('is-error');
+          setCommentsStatusMessage('Unable to load comments.', true);
           return;
         }
 
         const comments = await response.json();
         renderComments(Array.isArray(comments) ? comments : []);
       } catch (error) {
-        taskCommentsStatus.textContent = 'Unable to load comments right now.';
-        taskCommentsStatus.classList.add('is-error');
+        setCommentsStatusMessage('Unable to load comments right now.', true);
         console.error(error);
       }
     }
 
     async function deleteTaskComment(commentId, deleteButton) {
-      const taskId = activeTaskId ?? taskEditId.value;
+      const taskId = getActiveTaskId();
       if (!taskId) {
-        taskCommentError.textContent = 'Task not found for comments.';
+        setCommentFormError('Task not found for comments.');
         return;
       }
 
-      taskCommentError.textContent = '';
+      setCommentFormError('');
       if (deleteButton) {
         deleteButton.disabled = true;
       }
 
       try {
-        const response = await fetch(
-          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments/${encodeURIComponent(commentId)}`,
-          {
-            method: 'DELETE',
-          }
-        );
+        const response = await fetch(commentItemUrl(taskId, commentId), {
+          method: 'DELETE',
+        });
 
         if (response.status === 404) {
-          taskCommentError.textContent = 'Comment not found.';
+          setCommentFormError('Comment not found.');
           await loadTaskComments(taskId);
           return;
         }
 
         if (!response.ok) {
-          taskCommentError.textContent = 'Unable to delete comment.';
+          setCommentFormError('Unable to delete comment.');
           return;
         }
 
-        taskCommentError.textContent = '';
+        setCommentFormError('');
         await loadTaskComments(taskId);
       } catch (error) {
-        taskCommentError.textContent = 'Unable to delete comment right now.';
+        setCommentFormError('Unable to delete comment right now.');
         console.error(error);
       } finally {
         if (deleteButton) {
@@ -892,33 +917,30 @@
     async function addTaskComment(event) {
       event.preventDefault();
 
-      const taskId = activeTaskId ?? taskEditId.value;
+      const taskId = getActiveTaskId();
       if (!taskId) {
-        taskCommentError.textContent = 'Save the task before adding comments.';
+        setCommentFormError('Save the task before adding comments.');
         return;
       }
 
       const trimmedText = taskCommentText.value.trim();
       if (!trimmedText) {
-        taskCommentError.textContent = 'Comment text cannot be blank.';
+        setCommentFormError('Comment text cannot be blank.');
         taskCommentText.focus();
         return;
       }
 
-      taskCommentError.textContent = '';
+      setCommentFormError('');
       taskCommentSubmit.disabled = true;
 
       try {
-        const response = await fetch(
-          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ text: trimmedText }),
-          }
-        );
+        const response = await fetch(commentsCollectionUrl(taskId), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: trimmedText }),
+        });
 
         if (response.status === 422) {
           let message = 'Comment text cannot be blank.';
@@ -928,26 +950,26 @@
           } catch {
             // keep default blank-text message
           }
-          taskCommentError.textContent = message;
+          setCommentFormError(message);
           taskCommentText.focus();
           return;
         }
 
         if (response.status === 404) {
-          taskCommentError.textContent = 'Task not found for comments.';
+          setCommentFormError('Task not found for comments.');
           return;
         }
 
         if (!response.ok) {
-          taskCommentError.textContent = 'Unable to add comment.';
+          setCommentFormError('Unable to add comment.');
           return;
         }
 
         taskCommentText.value = '';
-        taskCommentError.textContent = '';
+        setCommentFormError('');
         await loadTaskComments(taskId);
       } catch (error) {
-        taskCommentError.textContent = 'Unable to add comment right now.';
+        setCommentFormError('Unable to add comment right now.');
         console.error(error);
       } finally {
         taskCommentSubmit.disabled = false;
