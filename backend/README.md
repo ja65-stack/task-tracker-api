@@ -2,6 +2,28 @@
 
 FastAPI Task Tracker API lives in this folder (branch `Mid-Course-Project`).
 
+## Folder structure (activity skeleton)
+
+```
+backend/
+├── app/
+│   ├── models.py               # Task + Comment + Activity models
+│   ├── storage.py
+│   ├── comment_storage.py
+│   ├── activity_storage.py     # activity.json helpers
+│   ├── routes/
+│   │   ├── comments.py
+│   │   └── activity.py         # stub (GET routes not wired yet)
+│   ├── services/
+│   │   ├── comment_service.py
+│   │   └── activity_service.py
+│   └── data/                   # *.json gitignored; created on first use
+├── frontend/
+├── tests/
+│   └── test_activity.py
+└── requirements.txt
+```
+
 ## How to run
 
 ### Backend
@@ -31,12 +53,12 @@ Open http://127.0.0.1:8001/
 py -m pytest tests/ -q
 ```
 
-Comment baseline:
+Activity skeleton tests:
 
 ```bash
-py -m pytest tests/test_comments_baseline.py -v
+py -m pytest tests/test_activity.py -q
 ```
 
-If you pin versions in `requirements.txt`, verify installed versions with `pip freeze` after installation.
+Versions in `requirements.txt` are unpinned. If you add pins later, verify with `pip freeze` after installation.
 
 See the root `README.md` for the full project run guide.
