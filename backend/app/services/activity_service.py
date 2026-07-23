@@ -1,8 +1,4 @@
-"""Activity helpers used by future activity routes and task write hooks.
-
-HTTP activity endpoints are not registered yet. This module prepares
-list/record orchestration against task + activity JSON storage.
-"""
+"""Activity helpers used by activity routes and task write hooks."""
 
 from __future__ import annotations
 

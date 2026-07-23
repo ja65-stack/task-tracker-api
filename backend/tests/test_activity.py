@@ -1,7 +1,4 @@
-"""Skeleton tests for activity models and JSON storage.
-
-Activity HTTP endpoints are not registered yet.
-"""
+"""Activity model, storage, and API tests."""
 
 from datetime import datetime, timezone
 
@@ -10,17 +7,6 @@ from pydantic import ValidationError
 
 from app import activity_storage
 from app.models import ActivityEvent, ActivityEventType, TaskStatus
-
-
-@pytest.fixture(autouse=True)
-def _reset_activity_storage(tmp_path, monkeypatch):
-    activity_file = tmp_path / "activity.json"
-    activity_file.write_text("[]", encoding="utf-8")
-    monkeypatch.setattr(activity_storage, "DATA_DIR", tmp_path)
-    monkeypatch.setattr(activity_storage, "ACTIVITY_FILE", activity_file)
-    activity_storage._reset()
-    yield
-    activity_storage._reset()
 
 
 def test_activity_event_accepts_status_changed_fields():
@@ -82,3 +68,105 @@ def test_list_events_can_filter_by_task_id():
 
     assert len(events) == 1
     assert events[0].task_id == 2
+
+
+def test_get_activity_empty_returns_200_and_empty_list(client):
+    response = client.get("/activity")
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_create_task_appends_created_activity_event(client):
+    created = client.post("/tasks", json={"title": "New work"}).json()
+
+    response = client.get("/activity")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    event = body[0]
+    assert event["event_type"] == "created"
+    assert event["task_id"] == created["id"]
+    assert set(event.keys()) >= {
+        "id",
+        "task_id",
+        "event_type",
+        "summary",
+        "created_at",
+    }
+
+
+def test_patch_title_appends_updated_activity_for_task(client, created_task):
+    task_id = created_task["id"]
+    other = client.post("/tasks", json={"title": "Other task"}).json()
+
+    response = client.patch(f"/tasks/{task_id}", json={"title": "Renamed"})
+    assert response.status_code == 200
+
+    task_activity = client.get(f"/tasks/{task_id}/activity")
+    assert task_activity.status_code == 200
+    body = task_activity.json()
+    assert all(item["task_id"] == task_id for item in body)
+    assert any(item["event_type"] == "updated" for item in body)
+    assert all(item["task_id"] != other["id"] for item in body)
+
+
+def test_valid_status_transition_appends_status_changed_event(client, created_task):
+    task_id = created_task["id"]
+    before = client.get(f"/tasks/{task_id}/activity").json()
+
+    response = client.patch(f"/tasks/{task_id}", json={"status": "InProgress"})
+    assert response.status_code == 200
+
+    after = client.get(f"/tasks/{task_id}/activity").json()
+    new_events = after[: len(after) - len(before)]
+    status_events = [
+        event
+        for event in new_events
+        if event["event_type"] == "status_changed"
+    ]
+    assert len(status_events) == 1
+    assert status_events[0]["from_status"] == "ToDo"
+    assert status_events[0]["to_status"] == "InProgress"
+
+
+def test_invalid_status_transition_does_not_append_activity(client, created_task):
+    task_id = created_task["id"]
+    before = client.get("/activity").json()
+
+    response = client.patch(f"/tasks/{task_id}", json={"status": "Done"})
+    assert response.status_code == 422
+
+    after = client.get("/activity").json()
+    assert len(after) == len(before)
+
+
+def test_get_task_activity_missing_task_returns_404(client):
+    response = client.get("/tasks/9999/activity")
+
+    assert response.status_code == 404
+    assert "not found" in response.json()["detail"].lower()
+
+
+def test_delete_task_appends_deleted_activity_event(client, created_task):
+    task_id = created_task["id"]
+
+    response = client.delete(f"/tasks/{task_id}")
+    assert response.status_code == 204
+
+    activity = client.get("/activity").json()
+    assert any(
+        event["event_type"] == "deleted" and event["task_id"] == task_id
+        for event in activity
+    )
+
+
+def test_delete_missing_task_does_not_append_activity(client):
+    before = client.get("/activity").json()
+
+    response = client.delete("/tasks/9999")
+    assert response.status_code == 404
+
+    after = client.get("/activity").json()
+    assert len(after) == len(before)
