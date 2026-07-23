@@ -20,5 +20,5 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Local JSON task/comment data (recreated automatically on first API run)
+# Local JSON task/comment/activity data (recreated automatically on first API run)
 backend/app/data/*.json

@@ -10,6 +10,7 @@ The current implementation on branch `Mid-Course-Project` provides:
 - Pydantic v2 task and comment models
 - JSON file persistence for tasks and comments
 - Task comment list/add/delete API
+- Activity-log skeleton (models + JSON storage; HTTP routes not wired yet)
 - A simple vanilla HTML/CSS/JS frontend (Kanban + edit modal with comments)
 
 ## Project Structure
@@ -21,12 +22,15 @@ backend/
 │   ├── models.py               # Task + Comment Pydantic models
 │   ├── storage.py              # tasks.json helpers
 │   ├── comment_storage.py      # comments.json helpers
+│   ├── activity_storage.py     # activity.json helpers (skeleton)
 │   ├── business_rules.py
 │   ├── data/                   # local JSON data (gitignored)
 │   ├── routes/
-│   │   └── comments.py         # comment list/add/delete routes
+│   │   ├── comments.py         # comment list/add/delete routes
+│   │   └── activity.py         # activity router stub (no endpoints yet)
 │   └── services/
-│       └── comment_service.py
+│       ├── comment_service.py
+│       └── activity_service.py
 ├── frontend/
 │   └── index.html
 ├── tests/

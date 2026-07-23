@@ -118,3 +118,25 @@ class Comment(BaseModel):
 
 
 CommentResponse = Comment
+
+
+class ActivityEventType(str, Enum):
+    CREATED = "created"
+    UPDATED = "updated"
+    DELETED = "deleted"
+    STATUS_CHANGED = "status_changed"
+
+
+class ActivityEvent(BaseModel):
+    """Persisted activity event. id and created_at are server-owned."""
+
+    id: int
+    task_id: int
+    event_type: ActivityEventType
+    summary: str
+    from_status: TaskStatus | None = None
+    to_status: TaskStatus | None = None
+    created_at: datetime
+
+
+ActivityResponse = ActivityEvent

@@ -12,8 +12,9 @@ from app.routes.comments import router as comments_router
 app = FastAPI(
     title="Task Tracker API",
     description=(
-        "Task Tracker REST API learning project with task CRUD "
-        "and task comment list/add/delete endpoints."
+        "Task Tracker REST API learning project with task CRUD, "
+        "task comments, and an activity-log skeleton "
+        "(activity HTTP routes will be added in a later step)."
     ),
     version="0.1.0",
 )
