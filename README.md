@@ -11,7 +11,7 @@ The current implementation on branch `Mid-Course-Project` provides:
 - JSON file persistence for tasks and comments
 - Task comment list/add/delete API
 - Activity log API (`GET /activity`, `GET /tasks/{id}/activity`) recorded on task create/update/delete/status change
-- A simple vanilla HTML/CSS/JS frontend (Kanban + edit modal with comments)
+- A simple vanilla HTML/CSS/JS frontend (Kanban, edit modal with comments, global + per-task activity)
 
 ## Project Structure
 
@@ -22,7 +22,7 @@ backend/
 │   ├── models.py               # Task + Comment Pydantic models
 │   ├── storage.py              # tasks.json helpers
 │   ├── comment_storage.py      # comments.json helpers
-│   ├── activity_storage.py     # activity.json helpers (skeleton)
+│   ├── activity_storage.py     # activity.json helpers
 │   ├── business_rules.py
 │   ├── data/                   # local JSON data (gitignored)
 │   ├── routes/

@@ -2,7 +2,7 @@
 
 FastAPI Task Tracker API lives in this folder (branch `Mid-Course-Project`).
 
-## Folder structure (activity skeleton)
+## Folder structure
 
 ```
 backend/
@@ -13,12 +13,12 @@ backend/
 │   ├── activity_storage.py     # activity.json helpers
 │   ├── routes/
 │   │   ├── comments.py
-│   │   └── activity.py         # stub (GET routes not wired yet)
+│   │   └── activity.py         # GET /activity and per-task activity
 │   ├── services/
 │   │   ├── comment_service.py
 │   │   └── activity_service.py
 │   └── data/                   # *.json gitignored; created on first use
-├── frontend/
+├── frontend/                   # Kanban + comments + activity UI
 ├── tests/
 │   └── test_activity.py
 └── requirements.txt
@@ -53,7 +53,7 @@ Open http://127.0.0.1:8001/
 py -m pytest tests/ -q
 ```
 
-Activity skeleton tests:
+Activity log tests:
 
 ```bash
 py -m pytest tests/test_activity.py -q
