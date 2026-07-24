@@ -149,6 +149,43 @@ def test_get_task_activity_missing_task_returns_404(client):
     assert "not found" in response.json()["detail"].lower()
 
 
+def test_get_task_activity_returns_created_event_newest_first(client, created_task):
+    """GET /tasks/{id}/activity returns that task's events, newest first."""
+    task_id = created_task["id"]
+
+    response = client.patch(f"/tasks/{task_id}", json={"title": "Renamed for activity"})
+    assert response.status_code == 200
+
+    task_activity = client.get(f"/tasks/{task_id}/activity")
+    assert task_activity.status_code == 200
+    body = task_activity.json()
+
+    assert len(body) >= 2
+    assert all(event["task_id"] == task_id for event in body)
+    assert body[0]["event_type"] == "updated"
+    assert any(event["event_type"] == "created" for event in body)
+    created_at_values = [event["created_at"] for event in body]
+    assert created_at_values == sorted(created_at_values, reverse=True)
+
+
+def test_get_task_activity_after_delete_returns_404(client, created_task):
+    """After delete, per-task activity is gone; deleted event stays on GET /activity."""
+    task_id = created_task["id"]
+
+    delete_response = client.delete(f"/tasks/{task_id}")
+    assert delete_response.status_code == 204
+
+    task_activity = client.get(f"/tasks/{task_id}/activity")
+    assert task_activity.status_code == 404
+    assert "not found" in task_activity.json()["detail"].lower()
+
+    global_activity = client.get("/activity").json()
+    assert any(
+        event["event_type"] == "deleted" and event["task_id"] == task_id
+        for event in global_activity
+    )
+
+
 def test_delete_task_appends_deleted_activity_event(client, created_task):
     task_id = created_task["id"]
 
