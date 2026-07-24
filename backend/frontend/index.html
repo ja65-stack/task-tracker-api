@@ -427,6 +427,72 @@
       font-size: 0.88rem;
     }
 
+    .activity-panel {
+      margin-top: 1.5rem;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .activity-panel h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #111827;
+    }
+
+    .activity-status {
+      margin: 0;
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .activity-status.is-error {
+      color: #b91c1c;
+    }
+
+    .activity-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+      max-height: 18rem;
+      overflow-y: auto;
+    }
+
+    .activity-list li {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .activity-list .activity-summary {
+      margin: 0;
+      color: #111827;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .activity-list .activity-meta {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+
+    .activity-empty {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 960px) {
       .board {
         grid-template-columns: 1fr;
@@ -489,6 +555,13 @@
           </div>
         </div>
       </article>
+    </section>
+
+    <section class="activity-panel" id="activityPanel" aria-labelledby="activityPanelTitle">
+      <h2 id="activityPanelTitle">Activity</h2>
+      <p class="activity-status" id="activityStatus" aria-live="polite">Loading activity…</p>
+      <ul class="activity-list" id="activityList"></ul>
+      <p class="activity-empty" id="activityEmpty" hidden>No activity yet.</p>
     </section>
   </main>
 
@@ -587,6 +660,9 @@
     const taskCommentText = document.getElementById('taskCommentText');
     const taskCommentError = document.getElementById('taskCommentError');
     const taskCommentSubmit = document.getElementById('taskCommentSubmit');
+    const activityStatus = document.getElementById('activityStatus');
+    const activityList = document.getElementById('activityList');
+    const activityEmpty = document.getElementById('activityEmpty');
     let activeTaskId = null;
 
     const boardWrapper = document.querySelector('.board-wrapper');
@@ -1298,10 +1374,94 @@
         } else {
           setBoardState('ready');
         }
+        await loadActivityFeed();
       } catch (error) {
         console.error(error);
         renderBoard([]);
         setBoardState('error', { onRetry: fetchTasks });
+        activityStatus.textContent = 'Unable to load activity right now.';
+        activityStatus.classList.add('is-error');
+        activityList.innerHTML = '';
+        activityEmpty.hidden = true;
+      }
+    }
+
+    function formatActivityType(eventType) {
+      const labels = {
+        created: 'Created',
+        updated: 'Updated',
+        deleted: 'Deleted',
+        status_changed: 'Status changed',
+      };
+      return labels[eventType] || eventType || 'Event';
+    }
+
+    function formatActivityMeta(event) {
+      const parts = [formatActivityType(event.event_type)];
+      if (event.task_id != null) {
+        parts.push(`Task #${event.task_id}`);
+      }
+      if (event.event_type === 'status_changed') {
+        const fromStatus = event.from_status || '?';
+        const toStatus = event.to_status || '?';
+        parts.push(`${fromStatus} → ${toStatus}`);
+      }
+      if (event.created_at) {
+        parts.push(new Date(event.created_at).toLocaleString());
+      }
+      return parts.join(' · ');
+    }
+
+    function renderActivityFeed(events) {
+      activityList.innerHTML = '';
+      activityStatus.classList.remove('is-error');
+
+      if (!events.length) {
+        activityStatus.textContent = '';
+        activityEmpty.hidden = false;
+        return;
+      }
+
+      activityEmpty.hidden = true;
+      activityStatus.textContent = `${events.length} event${events.length === 1 ? '' : 's'}`;
+
+      events.forEach(event => {
+        const item = document.createElement('li');
+
+        const summary = document.createElement('p');
+        summary.className = 'activity-summary';
+        summary.textContent = event.summary || formatActivityType(event.event_type);
+        item.appendChild(summary);
+
+        const meta = document.createElement('p');
+        meta.className = 'activity-meta';
+        meta.textContent = formatActivityMeta(event);
+        item.appendChild(meta);
+
+        activityList.appendChild(item);
+      });
+    }
+
+    async function loadActivityFeed() {
+      activityList.innerHTML = '';
+      activityEmpty.hidden = true;
+      activityStatus.classList.remove('is-error');
+      activityStatus.textContent = 'Loading activity…';
+
+      try {
+        const response = await fetch(`${baseUrl}/activity`);
+        if (!response.ok) {
+          activityStatus.textContent = 'Unable to load activity.';
+          activityStatus.classList.add('is-error');
+          return;
+        }
+
+        const events = await response.json();
+        renderActivityFeed(Array.isArray(events) ? events : []);
+      } catch (error) {
+        activityStatus.textContent = 'Unable to load activity right now.';
+        activityStatus.classList.add('is-error');
+        console.error(error);
       }
     }
 
