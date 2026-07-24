@@ -493,6 +493,28 @@
       font-size: 0.9rem;
     }
 
+    .task-activity-section {
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid #e5e7eb;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .task-activity-section[hidden] {
+      display: none;
+    }
+
+    .task-activity-section h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .task-activity-section .activity-list {
+      max-height: 12rem;
+    }
+
     @media (max-width: 960px) {
       .board {
         grid-template-columns: 1fr;
@@ -623,6 +645,13 @@
           </div>
         </form>
       </section>
+
+      <section class="task-activity-section" id="taskActivitySection" hidden>
+        <h3>Activity for this task</h3>
+        <p class="activity-status" id="taskActivityStatus" aria-live="polite"></p>
+        <ul class="activity-list" id="taskActivityList"></ul>
+        <p class="activity-empty" id="taskActivityEmpty" hidden>No activity for this task yet.</p>
+      </section>
     </div>
   </div>
 
@@ -663,6 +692,10 @@
     const activityStatus = document.getElementById('activityStatus');
     const activityList = document.getElementById('activityList');
     const activityEmpty = document.getElementById('activityEmpty');
+    const taskActivitySection = document.getElementById('taskActivitySection');
+    const taskActivityStatus = document.getElementById('taskActivityStatus');
+    const taskActivityList = document.getElementById('taskActivityList');
+    const taskActivityEmpty = document.getElementById('taskActivityEmpty');
     let activeTaskId = null;
 
     const boardWrapper = document.querySelector('.board-wrapper');
@@ -1052,6 +1085,13 @@
       }
     }
 
+    function clearTaskActivityPanel() {
+      taskActivityList.innerHTML = '';
+      taskActivityEmpty.hidden = true;
+      taskActivityStatus.classList.remove('is-error');
+      taskActivityStatus.textContent = '';
+    }
+
     function openNewTaskModal() {
       activeTaskId = null;
       taskEditId.value = '';
@@ -1063,6 +1103,8 @@
       taskEditError.textContent = '';
       clearCommentsPanel();
       taskCommentsSection.hidden = true;
+      clearTaskActivityPanel();
+      taskActivitySection.hidden = true;
       document.getElementById('taskEditModalTitle').textContent = 'New task';
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
@@ -1082,10 +1124,14 @@
       clearCommentsPanel();
       taskCommentsSection.hidden = false;
       taskCommentsStatus.textContent = 'Loading comments…';
+      clearTaskActivityPanel();
+      taskActivitySection.hidden = false;
+      taskActivityStatus.textContent = 'Loading activity…';
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       taskEditTitle.focus();
       loadTaskComments(task.id);
+      loadTaskActivity(task.id);
     }
 
     function closeTaskModal() {
@@ -1097,6 +1143,8 @@
       activeTaskId = null;
       clearCommentsPanel();
       taskCommentsSection.hidden = true;
+      clearTaskActivityPanel();
+      taskActivitySection.hidden = true;
     }
 
     function getErrorMessage(errorData) {
@@ -1412,18 +1460,19 @@
       return parts.join(' · ');
     }
 
-    function renderActivityFeed(events) {
-      activityList.innerHTML = '';
-      activityStatus.classList.remove('is-error');
+    function renderActivityInto(listEl, statusEl, emptyEl, events, emptyLabel) {
+      listEl.innerHTML = '';
+      statusEl.classList.remove('is-error');
 
       if (!events.length) {
-        activityStatus.textContent = '';
-        activityEmpty.hidden = false;
+        statusEl.textContent = '';
+        emptyEl.textContent = emptyLabel;
+        emptyEl.hidden = false;
         return;
       }
 
-      activityEmpty.hidden = true;
-      activityStatus.textContent = `${events.length} event${events.length === 1 ? '' : 's'}`;
+      emptyEl.hidden = true;
+      statusEl.textContent = `${events.length} event${events.length === 1 ? '' : 's'}`;
 
       events.forEach(event => {
         const item = document.createElement('li');
@@ -1438,8 +1487,22 @@
         meta.textContent = formatActivityMeta(event);
         item.appendChild(meta);
 
-        activityList.appendChild(item);
+        listEl.appendChild(item);
       });
+    }
+
+    function renderActivityFeed(events) {
+      renderActivityInto(activityList, activityStatus, activityEmpty, events, 'No activity yet.');
+    }
+
+    function renderTaskActivity(events) {
+      renderActivityInto(
+        taskActivityList,
+        taskActivityStatus,
+        taskActivityEmpty,
+        events,
+        'No activity for this task yet.'
+      );
     }
 
     async function loadActivityFeed() {
@@ -1461,6 +1524,31 @@
       } catch (error) {
         activityStatus.textContent = 'Unable to load activity right now.';
         activityStatus.classList.add('is-error');
+        console.error(error);
+      }
+    }
+
+    async function loadTaskActivity(taskId) {
+      taskActivityList.innerHTML = '';
+      taskActivityEmpty.hidden = true;
+      taskActivityStatus.classList.remove('is-error');
+      taskActivityStatus.textContent = 'Loading activity…';
+
+      try {
+        const response = await fetch(
+          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/activity`
+        );
+        if (!response.ok) {
+          taskActivityStatus.textContent = 'Unable to load activity.';
+          taskActivityStatus.classList.add('is-error');
+          return;
+        }
+
+        const events = await response.json();
+        renderTaskActivity(Array.isArray(events) ? events : []);
+      } catch (error) {
+        taskActivityStatus.textContent = 'Unable to load activity right now.';
+        taskActivityStatus.classList.add('is-error');
         console.error(error);
       }
     }
