@@ -7,9 +7,9 @@ from app import storage
 def test_add_task_returns_task_with_id_and_timestamps():
     task = storage.add_task(TaskCreate(title="First task"))
 
-    assert task.id
+    assert task.id == 1
     assert task.title == "First task"
-    assert task.description == ""
+    assert task.description is None
     assert task.status == TaskStatus.TODO
     assert task.priority == TaskPriority.MEDIUM
     assert task.created_at == task.updated_at

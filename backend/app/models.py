@@ -1,8 +1,9 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+TITLE_MAX_LENGTH = 200
 
 
 class TaskStatus(str, Enum):
@@ -17,63 +18,125 @@ class TaskPriority(str, Enum):
     HIGH = "High"
 
 
-class TaskCreate(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+def _normalize_title(value: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError("Title is required and cannot be blank")
+    if len(value) > TITLE_MAX_LENGTH:
+        raise ValueError(
+            f"Title must be at most {TITLE_MAX_LENGTH} characters"
+        )
+    return value
 
+
+class Task(BaseModel):
+    """Persisted task entity. id / timestamps are server-owned."""
+
+    id: int
     title: str = Field(...)
-    description: Optional[str] = ""
-    status: TaskStatus = TaskStatus.TODO
-    priority: TaskPriority = TaskPriority.MEDIUM
-    assignee: Optional[str] = None
+    description: str | None = None
+    status: TaskStatus
+    priority: TaskPriority
+    assignee: str | None = None
+    created_at: datetime
+    updated_at: datetime
 
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: str) -> str:
-        value = value.strip()
+        return _normalize_title(value)
 
-        if not value:
-            raise ValueError("Title is required and cannot be blank")
 
-        if len(value) > 200:
-            raise ValueError("Title must be at most 200 characters")
+# API response alias used by FastAPI routes
+TaskResponse = Task
 
-        return value
+
+class TaskCreate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: str = Field(...)
+    description: str | None = None
+    status: TaskStatus = TaskStatus.TODO
+    priority: TaskPriority = TaskPriority.MEDIUM
+    assignee: str | None = None
+
+    @field_validator("title")
+    @classmethod
+    def validate_title(cls, value: str) -> str:
+        return _normalize_title(value)
 
 
 class TaskUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    title: Optional[str] = None
-    description: Optional[str] = None
-    status: Optional[TaskStatus] = None
-    priority: Optional[TaskPriority] = None
-    assignee: Optional[str] = None
+    title: str | None = None
+    description: str | None = None
+    status: TaskStatus | None = None
+    priority: TaskPriority | None = None
+    assignee: str | None = None
 
     @field_validator("title")
     @classmethod
-    def validate_title(cls, value: Optional[str]) -> Optional[str]:
+    def validate_title(cls, value: str | None) -> str | None:
         if value is None:
             return value
-
-        value = value.strip()
-
-        if not value:
-            raise ValueError("Title is required and cannot be blank")
-
-        if len(value) > 200:
-            raise ValueError("Title must be at most 200 characters")
-
-        return value
+        return _normalize_title(value)
 
 
-class TaskResponse(BaseModel):
+def _normalize_comment_text(value: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError("Comment text is required and cannot be blank")
+    return value
+
+
+class CommentCreate(BaseModel):
+    """Client payload for creating a comment. text is the only client field."""
+
     model_config = ConfigDict(extra="forbid")
 
-    id: str
-    title: str
-    description: str
-    status: TaskStatus
-    priority: TaskPriority
-    assignee: Optional[str]
+    text: str = Field(...)
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        return _normalize_comment_text(value)
+
+
+class Comment(BaseModel):
+    """Persisted comment entity. id, task_id, and created_at are server-owned."""
+
+    id: int
+    task_id: int
+    text: str = Field(...)
     created_at: datetime
-    updated_at: datetime
+
+    @field_validator("text")
+    @classmethod
+    def validate_text(cls, value: str) -> str:
+        return _normalize_comment_text(value)
+
+
+CommentResponse = Comment
+
+
+class ActivityEventType(str, Enum):
+    CREATED = "created"
+    UPDATED = "updated"
+    DELETED = "deleted"
+    STATUS_CHANGED = "status_changed"
+
+
+class ActivityEvent(BaseModel):
+    """Persisted activity event. id and created_at are server-owned."""
+
+    id: int
+    task_id: int
+    event_type: ActivityEventType
+    summary: str
+    from_status: TaskStatus | None = None
+    to_status: TaskStatus | None = None
+    created_at: datetime
+
+
+ActivityResponse = ActivityEvent

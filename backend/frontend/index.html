@@ -134,6 +134,11 @@
       color: #3730a3;
     }
 
+    .badge.comments {
+      background: #ecfdf5;
+      color: #047857;
+    }
+
     .card button {
       border: none;
       border-radius: 12px;
@@ -191,6 +196,8 @@
     .modal-dialog {
       position: relative;
       width: min(100%, 32rem);
+      max-height: min(90vh, 44rem);
+      overflow-y: auto;
       background: #ffffff;
       border-radius: 20px;
       padding: 1.5rem;
@@ -275,6 +282,269 @@
       font-size: 0.92rem;
     }
 
+    .comments-section {
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid #e5e7eb;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .comments-section[hidden] {
+      display: none;
+    }
+
+    .comments-section h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .comments-status {
+      margin: 0;
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .comments-status.is-error {
+      color: #b91c1c;
+    }
+
+    .comments-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+      max-height: 12rem;
+      overflow-y: auto;
+    }
+
+    .comments-list li {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.7rem 0.8rem;
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .comments-list .comment-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .comments-list .comment-text {
+      margin: 0;
+      color: #111827;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      flex: 1;
+    }
+
+    .comments-list .comment-delete {
+      border: none;
+      border-radius: 999px;
+      padding: 0.35rem 0.7rem;
+      background: #fee2e2;
+      color: #991b1b;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .comments-list .comment-delete:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .comments-list .comment-meta {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+
+    .comments-empty {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .comment-form {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .comment-form label {
+      display: grid;
+      gap: 0.35rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #374151;
+    }
+
+    .comment-form textarea {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      font: inherit;
+      min-height: 4.2rem;
+      resize: vertical;
+    }
+
+    .comment-form-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .comment-form-actions button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.55rem 0.95rem;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .comment-form-actions button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .comment-form-error {
+      min-height: 1.1rem;
+      margin: 0;
+      color: #b91c1c;
+      font-size: 0.88rem;
+    }
+
+    .activity-panel {
+      margin-top: 1.5rem;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .activity-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .activity-panel h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      color: #111827;
+    }
+
+    .activity-refresh {
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 0.35rem 0.8rem;
+      background: #ffffff;
+      color: #374151;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .activity-refresh:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .activity-hint {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.85rem;
+      line-height: 1.45;
+    }
+
+    .activity-status {
+      margin: 0;
+      min-height: 1.2rem;
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .activity-status.is-error {
+      color: #b91c1c;
+    }
+
+    .activity-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 0.65rem;
+      max-height: 18rem;
+      overflow-y: auto;
+    }
+
+    .activity-list li {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .activity-list .activity-summary {
+      margin: 0;
+      color: #111827;
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .activity-list .activity-meta {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.8rem;
+    }
+
+    .activity-empty {
+      margin: 0;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    .task-activity-section {
+      margin-top: 1.25rem;
+      padding-top: 1.1rem;
+      border-top: 1px solid #e5e7eb;
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .task-activity-section[hidden] {
+      display: none;
+    }
+
+    .task-activity-section h3 {
+      margin: 0;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    .task-activity-section .activity-list {
+      max-height: 12rem;
+    }
+
     @media (max-width: 960px) {
       .board {
         grid-template-columns: 1fr;
@@ -285,7 +555,7 @@
 <body>
   <header class="page-header">
     <h1>Task Tracker Kanban</h1>
-    <p>Track tasks in a simple board layout with To Do, In Progress, and Done columns. This static version shows sample cards ready for later rendering logic.</p>
+    <p>Track tasks across To Do, In Progress, and Done. Open a card to edit details, comments, and that task’s activity; the board also shows a recent activity feed.</p>
     <div class="page-actions">
       <button id="newTaskButton" class="primary-action" type="button">New Task</button>
     </div>
@@ -338,6 +608,17 @@
         </div>
       </article>
     </section>
+
+    <section class="activity-panel" id="activityPanel" aria-labelledby="activityPanelTitle">
+      <div class="activity-panel-header">
+        <h2 id="activityPanelTitle">Activity</h2>
+        <button id="activityRefreshButton" class="activity-refresh" type="button">Refresh</button>
+      </div>
+      <p class="activity-hint">Newest first. Deleted tasks appear here; open a task to see its own history.</p>
+      <p class="activity-status" id="activityStatus" aria-live="polite">Loading activity…</p>
+      <ul class="activity-list" id="activityList"></ul>
+      <p class="activity-empty" id="activityEmpty" hidden>No activity yet.</p>
+    </section>
   </main>
 
   <div class="modal" id="taskEditModal" role="dialog" aria-modal="true" aria-labelledby="taskEditModalTitle">
@@ -381,12 +662,37 @@
           <button class="primary" type="submit">Save</button>
         </div>
       </form>
+
+      <section class="comments-section" id="taskCommentsSection" hidden>
+        <h3>Comments</h3>
+        <p class="comments-status" id="taskCommentsStatus" aria-live="polite"></p>
+        <ul class="comments-list" id="taskCommentsList"></ul>
+        <p class="comments-empty" id="taskCommentsEmpty" hidden>No comments yet.</p>
+        <form id="taskCommentForm" class="comment-form">
+          <label>
+            Add a comment
+            <textarea id="taskCommentText" name="text" rows="3" placeholder="Write a short note…"></textarea>
+          </label>
+          <p class="comment-form-error" id="taskCommentError" role="alert"></p>
+          <div class="comment-form-actions">
+            <button id="taskCommentSubmit" type="submit">Add comment</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="task-activity-section" id="taskActivitySection" hidden>
+        <h3>Activity for this task</h3>
+        <p class="activity-status" id="taskActivityStatus" aria-live="polite"></p>
+        <ul class="activity-list" id="taskActivityList"></ul>
+        <p class="activity-empty" id="taskActivityEmpty" hidden>No activity for this task yet.</p>
+      </section>
     </div>
   </div>
 
   <script>
-    const baseUrl = 'http://localhost:8000';
+    const baseUrl = 'http://127.0.0.1:8000';
     let tasks = [];
+    const commentCounts = {};
 
     const columns = {
       ToDo: document.querySelector('.column[data-status="ToDo"] .cards'),
@@ -409,7 +715,24 @@
     const taskEditPriority = document.getElementById('taskEditPriority');
     const taskEditAssignee = document.getElementById('taskEditAssignee');
     const taskEditError = document.getElementById('taskEditError');
+    const taskCommentsSection = document.getElementById('taskCommentsSection');
+    const taskCommentsStatus = document.getElementById('taskCommentsStatus');
+    const taskCommentsList = document.getElementById('taskCommentsList');
+    const taskCommentsEmpty = document.getElementById('taskCommentsEmpty');
+    const taskCommentForm = document.getElementById('taskCommentForm');
+    const taskCommentText = document.getElementById('taskCommentText');
+    const taskCommentError = document.getElementById('taskCommentError');
+    const taskCommentSubmit = document.getElementById('taskCommentSubmit');
+    const activityStatus = document.getElementById('activityStatus');
+    const activityList = document.getElementById('activityList');
+    const activityEmpty = document.getElementById('activityEmpty');
+    const activityRefreshButton = document.getElementById('activityRefreshButton');
+    const taskActivitySection = document.getElementById('taskActivitySection');
+    const taskActivityStatus = document.getElementById('taskActivityStatus');
+    const taskActivityList = document.getElementById('taskActivityList');
+    const taskActivityEmpty = document.getElementById('taskActivityEmpty');
     let activeTaskId = null;
+    let originalEditStatus = null;
 
     const boardWrapper = document.querySelector('.board-wrapper');
     const boardStatus = document.createElement('div');
@@ -474,6 +797,76 @@
       Low: 2,
     };
 
+    function formatCommentCount(count) {
+      const safeCount = Number.isFinite(count) ? count : 0;
+      return `${safeCount} comment${safeCount === 1 ? '' : 's'}`;
+    }
+
+    function commentsCollectionUrl(taskId) {
+      return `${baseUrl}/tasks/${encodeURIComponent(taskId)}/comments`;
+    }
+
+    function commentItemUrl(taskId, commentId) {
+      return `${commentsCollectionUrl(taskId)}/${encodeURIComponent(commentId)}`;
+    }
+
+    function getActiveTaskId() {
+      return activeTaskId ?? taskEditId.value;
+    }
+
+    function setCommentsStatusMessage(message, isError = false) {
+      taskCommentsStatus.textContent = message;
+      taskCommentsStatus.classList.toggle('is-error', Boolean(isError));
+    }
+
+    function setCommentFormError(message) {
+      taskCommentError.textContent = message;
+    }
+
+    function syncActiveTaskCommentCount(count) {
+      if (activeTaskId != null) {
+        setCardCommentCount(activeTaskId, count);
+      }
+    }
+
+    function setCardCommentCount(taskId, count) {
+      commentCounts[taskId] = count;
+      const card = document.querySelector(`.card[data-task-id="${taskId}"]`);
+      if (!card) {
+        return;
+      }
+
+      const badge = card.querySelector('.badge.comments');
+      if (badge) {
+        badge.textContent = formatCommentCount(count);
+      }
+    }
+
+    async function fetchTaskComments(taskId) {
+      const response = await fetch(commentsCollectionUrl(taskId));
+      return response;
+    }
+
+    async function refreshCommentCounts() {
+      const taskIds = tasks.map(task => task.id);
+      await Promise.all(
+        taskIds.map(async taskId => {
+          try {
+            const response = await fetchTaskComments(taskId);
+            if (!response.ok) {
+              return;
+            }
+
+            const comments = await response.json();
+            const count = Array.isArray(comments) ? comments.length : 0;
+            setCardCommentCount(taskId, count);
+          } catch (error) {
+            console.error(error);
+          }
+        })
+      );
+    }
+
     function createCard(task) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -503,6 +896,14 @@
       assignee.textContent = task.assignee ? task.assignee : 'Unassigned';
       meta.appendChild(assignee);
 
+      const commentsBadge = document.createElement('span');
+      commentsBadge.className = 'badge comments';
+      const knownCount = commentCounts[task.id];
+      commentsBadge.textContent = Number.isFinite(knownCount)
+        ? formatCommentCount(knownCount)
+        : '…';
+      meta.appendChild(commentsBadge);
+
       const editButton = document.createElement('button');
       editButton.type = 'button';
       editButton.textContent = 'Edit';
@@ -523,8 +924,213 @@
       return placeholder;
     }
 
+    function clearCommentsPanel() {
+      taskCommentsList.innerHTML = '';
+      setCommentsStatusMessage('');
+      taskCommentsEmpty.hidden = true;
+      taskCommentText.value = '';
+      setCommentFormError('');
+      taskCommentSubmit.disabled = false;
+    }
+
+    function formatCommentMeta(comment) {
+      const createdAt = comment.created_at
+        ? new Date(comment.created_at).toLocaleString()
+        : '';
+      return createdAt
+        ? `Comment #${comment.id} · ${createdAt}`
+        : `Comment #${comment.id}`;
+    }
+
+    function createCommentListItem(comment) {
+      const item = document.createElement('li');
+      item.dataset.commentId = comment.id;
+
+      const header = document.createElement('div');
+      header.className = 'comment-header';
+
+      const text = document.createElement('p');
+      text.className = 'comment-text';
+      text.textContent = comment.text ?? '';
+      header.appendChild(text);
+
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'comment-delete';
+      deleteButton.textContent = 'Delete';
+      deleteButton.addEventListener('click', () => {
+        deleteTaskComment(comment.id, deleteButton);
+      });
+      header.appendChild(deleteButton);
+      item.appendChild(header);
+
+      const meta = document.createElement('p');
+      meta.className = 'comment-meta';
+      meta.textContent = formatCommentMeta(comment);
+      item.appendChild(meta);
+
+      return item;
+    }
+
+    function renderComments(comments) {
+      taskCommentsList.innerHTML = '';
+      taskCommentsStatus.classList.remove('is-error');
+
+      if (!comments.length) {
+        setCommentsStatusMessage('');
+        taskCommentsEmpty.hidden = false;
+        syncActiveTaskCommentCount(0);
+        return;
+      }
+
+      taskCommentsEmpty.hidden = true;
+      setCommentsStatusMessage(formatCommentCount(comments.length));
+      syncActiveTaskCommentCount(comments.length);
+
+      comments.forEach(comment => {
+        taskCommentsList.appendChild(createCommentListItem(comment));
+      });
+    }
+
+    async function loadTaskComments(taskId) {
+      taskCommentsList.innerHTML = '';
+      taskCommentsEmpty.hidden = true;
+      taskCommentsSection.hidden = false;
+      setCommentsStatusMessage('Loading comments…');
+
+      try {
+        const response = await fetchTaskComments(taskId);
+
+        if (response.status === 404) {
+          setCommentsStatusMessage('Task not found for comments.', true);
+          return;
+        }
+
+        if (!response.ok) {
+          setCommentsStatusMessage('Unable to load comments.', true);
+          return;
+        }
+
+        const comments = await response.json();
+        renderComments(Array.isArray(comments) ? comments : []);
+      } catch (error) {
+        setCommentsStatusMessage('Unable to load comments right now.', true);
+        console.error(error);
+      }
+    }
+
+    async function deleteTaskComment(commentId, deleteButton) {
+      const taskId = getActiveTaskId();
+      if (!taskId) {
+        setCommentFormError('Task not found for comments.');
+        return;
+      }
+
+      setCommentFormError('');
+      if (deleteButton) {
+        deleteButton.disabled = true;
+      }
+
+      try {
+        const response = await fetch(commentItemUrl(taskId, commentId), {
+          method: 'DELETE',
+        });
+
+        if (response.status === 404) {
+          setCommentFormError('Comment not found.');
+          await loadTaskComments(taskId);
+          return;
+        }
+
+        if (!response.ok) {
+          setCommentFormError('Unable to delete comment.');
+          return;
+        }
+
+        setCommentFormError('');
+        await loadTaskComments(taskId);
+      } catch (error) {
+        setCommentFormError('Unable to delete comment right now.');
+        console.error(error);
+      } finally {
+        if (deleteButton) {
+          deleteButton.disabled = false;
+        }
+      }
+    }
+
+    async function addTaskComment(event) {
+      event.preventDefault();
+
+      const taskId = getActiveTaskId();
+      if (!taskId) {
+        setCommentFormError('Save the task before adding comments.');
+        return;
+      }
+
+      const trimmedText = taskCommentText.value.trim();
+      if (!trimmedText) {
+        setCommentFormError('Comment text cannot be blank.');
+        taskCommentText.focus();
+        return;
+      }
+
+      setCommentFormError('');
+      taskCommentSubmit.disabled = true;
+
+      try {
+        const response = await fetch(commentsCollectionUrl(taskId), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: trimmedText }),
+        });
+
+        if (response.status === 422) {
+          let message = 'Comment text cannot be blank.';
+          try {
+            const errorData = await response.json();
+            message = getErrorMessage(errorData) || message;
+          } catch {
+            // keep default blank-text message
+          }
+          setCommentFormError(message);
+          taskCommentText.focus();
+          return;
+        }
+
+        if (response.status === 404) {
+          setCommentFormError('Task not found for comments.');
+          return;
+        }
+
+        if (!response.ok) {
+          setCommentFormError('Unable to add comment.');
+          return;
+        }
+
+        taskCommentText.value = '';
+        setCommentFormError('');
+        await loadTaskComments(taskId);
+      } catch (error) {
+        setCommentFormError('Unable to add comment right now.');
+        console.error(error);
+      } finally {
+        taskCommentSubmit.disabled = false;
+      }
+    }
+
+    function clearTaskActivityPanel() {
+      taskActivityList.innerHTML = '';
+      taskActivityEmpty.hidden = true;
+      taskActivityStatus.classList.remove('is-error');
+      taskActivityStatus.textContent = '';
+    }
+
     function openNewTaskModal() {
       activeTaskId = null;
+      originalEditStatus = null;
       taskEditId.value = '';
       taskEditTitle.value = '';
       taskEditDescription.value = '';
@@ -532,6 +1138,10 @@
       taskEditPriority.value = 'Medium';
       taskEditAssignee.value = '';
       taskEditError.textContent = '';
+      clearCommentsPanel();
+      taskCommentsSection.hidden = true;
+      clearTaskActivityPanel();
+      taskActivitySection.hidden = true;
       document.getElementById('taskEditModalTitle').textContent = 'New task';
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
@@ -540,17 +1150,26 @@
 
     function openTaskModal(task) {
       activeTaskId = task.id;
+      originalEditStatus = task.status ?? 'ToDo';
       taskEditId.value = task.id;
       taskEditTitle.value = task.title ?? '';
       taskEditDescription.value = task.description ?? '';
-      taskEditStatus.value = task.status ?? 'ToDo';
+      taskEditStatus.value = originalEditStatus;
       taskEditPriority.value = task.priority ?? 'Medium';
       taskEditAssignee.value = task.assignee ?? '';
       taskEditError.textContent = '';
       document.getElementById('taskEditModalTitle').textContent = 'Edit task';
+      clearCommentsPanel();
+      taskCommentsSection.hidden = false;
+      taskCommentsStatus.textContent = 'Loading comments…';
+      clearTaskActivityPanel();
+      taskActivitySection.hidden = false;
+      taskActivityStatus.textContent = 'Loading activity…';
       taskEditModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
       taskEditTitle.focus();
+      loadTaskComments(task.id);
+      loadTaskActivity(task.id);
     }
 
     function closeTaskModal() {
@@ -560,6 +1179,11 @@
       taskEditForm.reset();
       taskEditId.value = '';
       activeTaskId = null;
+      originalEditStatus = null;
+      clearCommentsPanel();
+      taskCommentsSection.hidden = true;
+      clearTaskActivityPanel();
+      taskActivitySection.hidden = true;
     }
 
     function getErrorMessage(errorData) {
@@ -601,10 +1225,17 @@
       const payload = {
         title: trimmedTitle,
         description: taskEditDescription.value,
-        status: taskEditStatus.value,
         priority: taskEditPriority.value,
         assignee: taskEditAssignee.value.trim() ? taskEditAssignee.value.trim() : null,
       };
+
+      // PATCH: only send status when it changed. Same-to-same is rejected by the API
+      // ("Invalid status transition from ToDo to ToDo"), which blocked title-only edits.
+      if (!taskId) {
+        payload.status = taskEditStatus.value;
+      } else if (taskEditStatus.value !== originalEditStatus) {
+        payload.status = taskEditStatus.value;
+      }
 
       taskEditError.textContent = '';
 
@@ -729,6 +1360,7 @@
       renderColumn('ToDo', grouped.ToDo);
       renderColumn('InProgress', grouped.InProgress);
       renderColumn('Done', grouped.Done);
+      refreshCommentCounts();
     }
 
     function patchTaskStatus(taskId, newStatus) {
@@ -836,10 +1468,154 @@
         } else {
           setBoardState('ready');
         }
+        await loadActivityFeed();
       } catch (error) {
         console.error(error);
         renderBoard([]);
         setBoardState('error', { onRetry: fetchTasks });
+        activityStatus.textContent = 'Unable to load activity right now.';
+        activityStatus.classList.add('is-error');
+        activityList.innerHTML = '';
+        activityEmpty.hidden = true;
+      }
+    }
+
+    function formatActivityType(eventType) {
+      const labels = {
+        created: 'Created',
+        updated: 'Updated',
+        deleted: 'Deleted',
+        status_changed: 'Status changed',
+      };
+      return labels[eventType] || eventType || 'Event';
+    }
+
+    function formatActivityStatus(status) {
+      if (!status) {
+        return '?';
+      }
+      return statusLabels[status] || status;
+    }
+
+    function formatActivityMeta(event) {
+      const parts = [formatActivityType(event.event_type)];
+      if (event.task_id != null) {
+        parts.push(`Task #${event.task_id}`);
+      }
+      if (event.event_type === 'status_changed') {
+        parts.push(
+          `${formatActivityStatus(event.from_status)} → ${formatActivityStatus(event.to_status)}`
+        );
+      }
+      if (event.created_at) {
+        parts.push(new Date(event.created_at).toLocaleString());
+      }
+      return parts.join(' · ');
+    }
+
+    function renderActivityInto(listEl, statusEl, emptyEl, events, emptyLabel) {
+      listEl.innerHTML = '';
+      statusEl.classList.remove('is-error');
+
+      if (!events.length) {
+        statusEl.textContent = '';
+        emptyEl.textContent = emptyLabel;
+        emptyEl.hidden = false;
+        return;
+      }
+
+      emptyEl.hidden = true;
+      statusEl.textContent = `${events.length} event${events.length === 1 ? '' : 's'}`;
+
+      events.forEach(event => {
+        const item = document.createElement('li');
+
+        const summary = document.createElement('p');
+        summary.className = 'activity-summary';
+        summary.textContent = event.summary || formatActivityType(event.event_type);
+        item.appendChild(summary);
+
+        const meta = document.createElement('p');
+        meta.className = 'activity-meta';
+        meta.textContent = formatActivityMeta(event);
+        item.appendChild(meta);
+
+        listEl.appendChild(item);
+      });
+    }
+
+    function renderActivityFeed(events) {
+      renderActivityInto(activityList, activityStatus, activityEmpty, events, 'No activity yet.');
+    }
+
+    function renderTaskActivity(events) {
+      renderActivityInto(
+        taskActivityList,
+        taskActivityStatus,
+        taskActivityEmpty,
+        events,
+        'No activity for this task yet.'
+      );
+    }
+
+    async function loadActivityFeed() {
+      activityList.innerHTML = '';
+      activityEmpty.hidden = true;
+      activityStatus.classList.remove('is-error');
+      activityStatus.textContent = 'Loading activity…';
+      activityRefreshButton.disabled = true;
+
+      try {
+        const response = await fetch(`${baseUrl}/activity`);
+        if (!response.ok) {
+          activityStatus.textContent = 'Unable to load activity.';
+          activityStatus.classList.add('is-error');
+          return;
+        }
+
+        const events = await response.json();
+        renderActivityFeed(Array.isArray(events) ? events : []);
+      } catch (error) {
+        activityStatus.textContent = 'Unable to load activity right now.';
+        activityStatus.classList.add('is-error');
+        console.error(error);
+      } finally {
+        activityRefreshButton.disabled = false;
+      }
+    }
+
+    async function loadTaskActivity(taskId) {
+      const requestedTaskId = taskId;
+      taskActivityList.innerHTML = '';
+      taskActivityEmpty.hidden = true;
+      taskActivityStatus.classList.remove('is-error');
+      taskActivityStatus.textContent = 'Loading activity…';
+
+      try {
+        const response = await fetch(
+          `${baseUrl}/tasks/${encodeURIComponent(taskId)}/activity`
+        );
+        if (activeTaskId !== requestedTaskId) {
+          return;
+        }
+        if (!response.ok) {
+          taskActivityStatus.textContent = 'Unable to load activity.';
+          taskActivityStatus.classList.add('is-error');
+          return;
+        }
+
+        const events = await response.json();
+        if (activeTaskId !== requestedTaskId) {
+          return;
+        }
+        renderTaskActivity(Array.isArray(events) ? events : []);
+      } catch (error) {
+        if (activeTaskId !== requestedTaskId) {
+          return;
+        }
+        taskActivityStatus.textContent = 'Unable to load activity right now.';
+        taskActivityStatus.classList.add('is-error');
+        console.error(error);
       }
     }
 
@@ -847,7 +1623,12 @@
       openNewTaskModal();
     });
 
+    activityRefreshButton.addEventListener('click', () => {
+      loadActivityFeed();
+    });
+
     taskEditForm.addEventListener('submit', saveTaskEdit);
+    taskCommentForm.addEventListener('submit', addTaskComment);
 
     document.querySelectorAll('[data-action="close"], [data-action="cancel"]').forEach(control => {
       control.addEventListener('click', () => {
