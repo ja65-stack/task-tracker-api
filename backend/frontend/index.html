@@ -732,6 +732,7 @@
     const taskActivityList = document.getElementById('taskActivityList');
     const taskActivityEmpty = document.getElementById('taskActivityEmpty');
     let activeTaskId = null;
+    let originalEditStatus = null;
 
     const boardWrapper = document.querySelector('.board-wrapper');
     const boardStatus = document.createElement('div');
@@ -1129,6 +1130,7 @@
 
     function openNewTaskModal() {
       activeTaskId = null;
+      originalEditStatus = null;
       taskEditId.value = '';
       taskEditTitle.value = '';
       taskEditDescription.value = '';
@@ -1148,10 +1150,11 @@
 
     function openTaskModal(task) {
       activeTaskId = task.id;
+      originalEditStatus = task.status ?? 'ToDo';
       taskEditId.value = task.id;
       taskEditTitle.value = task.title ?? '';
       taskEditDescription.value = task.description ?? '';
-      taskEditStatus.value = task.status ?? 'ToDo';
+      taskEditStatus.value = originalEditStatus;
       taskEditPriority.value = task.priority ?? 'Medium';
       taskEditAssignee.value = task.assignee ?? '';
       taskEditError.textContent = '';
@@ -1176,6 +1179,7 @@
       taskEditForm.reset();
       taskEditId.value = '';
       activeTaskId = null;
+      originalEditStatus = null;
       clearCommentsPanel();
       taskCommentsSection.hidden = true;
       clearTaskActivityPanel();
@@ -1221,10 +1225,17 @@
       const payload = {
         title: trimmedTitle,
         description: taskEditDescription.value,
-        status: taskEditStatus.value,
         priority: taskEditPriority.value,
         assignee: taskEditAssignee.value.trim() ? taskEditAssignee.value.trim() : null,
       };
+
+      // PATCH: only send status when it changed. Same-to-same is rejected by the API
+      // ("Invalid status transition from ToDo to ToDo"), which blocked title-only edits.
+      if (!taskId) {
+        payload.status = taskEditStatus.value;
+      } else if (taskEditStatus.value !== originalEditStatus) {
+        payload.status = taskEditStatus.value;
+      }
 
       taskEditError.textContent = '';
 
