@@ -18,6 +18,14 @@ def _not_found(exc: Exception) -> HTTPException:
 
 @router.get("/activity", response_model=list[ActivityResponse])
 def list_activity() -> list[ActivityResponse]:
+    """Return the global activity feed, newest first.
+
+    Returns:
+        list[ActivityResponse]: All activity events.
+
+    Example:
+        ``GET /activity``
+    """
     return activity_service.list_all_activity()
 
 
@@ -26,6 +34,20 @@ def list_activity() -> list[ActivityResponse]:
     response_model=list[ActivityResponse],
 )
 def list_activity_for_task(task_id: int) -> list[ActivityResponse]:
+    """Return activity events for one task, newest first.
+
+    Args:
+        task_id: Task id that must still exist.
+
+    Returns:
+        list[ActivityResponse]: Events for that task.
+
+    Raises:
+        HTTPException: 404 if the task does not exist (including after delete).
+
+    Example:
+        ``GET /tasks/1/activity``
+    """
     try:
         return activity_service.list_task_activity(task_id)
     except TaskNotFoundError as exc:

@@ -42,6 +42,14 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
+    """Return API liveness information.
+
+    Returns:
+        dict: Mapping with ``status`` set to ``"ok"`` and a UTC ``timestamp``.
+
+    Example:
+        ``GET /health`` → ``{"status": "ok", "timestamp": "..."}``
+    """
     return {
         "status": "ok",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -53,11 +61,38 @@ def list_tasks(
     status: TaskStatus | None = None,
     priority: TaskPriority | None = None,
 ) -> list[TaskResponse]:
+    """List tasks, optionally filtered by status and/or priority.
+
+    Args:
+        status: Optional task status filter.
+        priority: Optional task priority filter.
+
+    Returns:
+        list[TaskResponse]: Matching tasks from storage.
+
+    Example:
+        ``GET /tasks``
+        ``GET /tasks?status=ToDo&priority=High``
+    """
     return storage.get_all_tasks(status=status, priority=priority)
 
 
 @app.get("/tasks/{task_id}", response_model=TaskResponse, tags=["tasks"])
 def get_task(task_id: str) -> TaskResponse:
+    """Fetch a single task by id.
+
+    Args:
+        task_id: Task identifier from the path (parsed as an integer in storage).
+
+    Returns:
+        TaskResponse: The matching task.
+
+    Raises:
+        HTTPException: 404 if the task does not exist or ``task_id`` is not an int.
+
+    Example:
+        ``GET /tasks/1``
+    """
     task = storage.get_task_by_id(task_id)
     if task is None:
         raise HTTPException(
@@ -69,6 +104,28 @@ def get_task(task_id: str) -> TaskResponse:
 
 @app.patch("/tasks/{task_id}", response_model=TaskResponse, tags=["tasks"])
 def update_task(task_id: str, payload: TaskUpdate) -> TaskResponse:
+    """Partially update a task and record activity for successful writes.
+
+    If the body has no set fields, returns the existing task unchanged and does
+    not append activity. When ``status`` is present, validates the transition
+    before updating. A status change records ``status_changed``; any other
+    changed fields record ``updated`` (both may be recorded for one request).
+
+    Args:
+        task_id: Task identifier from the path.
+        payload: Partial update fields (extra fields forbidden by the model).
+
+    Returns:
+        TaskResponse: The task after update, or the unchanged task if empty body.
+
+    Raises:
+        HTTPException: 404 if the task is missing; 422 if status transition is
+            invalid.
+
+    Example:
+        ``PATCH /tasks/1`` with ``{"title": "Renamed"}``
+        ``PATCH /tasks/1`` with ``{"status": "InProgress"}``
+    """
     existing = storage.get_task_by_id(task_id)
     if existing is None:
         raise HTTPException(
@@ -110,11 +167,41 @@ def update_task(task_id: str, payload: TaskUpdate) -> TaskResponse:
 
 @app.patch("/task/{task_id}", response_model=TaskResponse, tags=["tasks"])
 def update_task_alias(task_id: str, payload: TaskUpdate) -> TaskResponse:
+    """Alias of ``PATCH /tasks/{task_id}`` that delegates to ``update_task``.
+
+    Args:
+        task_id: Task identifier from the path.
+        payload: Partial update fields.
+
+    Returns:
+        TaskResponse: Result of ``update_task``.
+
+    Raises:
+        HTTPException: Same as ``update_task`` (404 / 422).
+
+    Example:
+        ``PATCH /task/1`` with ``{"priority": "High"}``
+    """
     return update_task(task_id, payload)
 
 
 @app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT, tags=["tasks"])
 def delete_task(task_id: str) -> None:
+    """Delete a task and append a ``deleted`` activity event on success.
+
+    Args:
+        task_id: Task identifier from the path.
+
+    Returns:
+        None: Empty body with HTTP 204 on success.
+
+    Raises:
+        HTTPException: 404 if the task does not exist or delete did not remove a
+            row.
+
+    Example:
+        ``DELETE /tasks/1``
+    """
     existing = storage.get_task_by_id(task_id)
     if existing is None:
         raise HTTPException(
@@ -133,6 +220,22 @@ def delete_task(task_id: str) -> None:
 
 @app.post("/tasks", response_model=TaskResponse, status_code=status.HTTP_201_CREATED, tags=["tasks"])
 def create_task(payload: TaskCreate) -> TaskResponse:
+    """Create a task and append a ``created`` activity event.
+
+    Args:
+        payload: New task fields. Title is required (blank titles rejected by the
+            model).
+
+    Returns:
+        TaskResponse: The persisted task including server-owned id and timestamps.
+
+    Note:
+        [VERIFY] Invalid bodies are rejected by FastAPI/Pydantic before this
+        handler runs (typically HTTP 422).
+
+    Example:
+        ``POST /tasks`` with ``{"title": "New work"}``
+    """
     task = storage.add_task(payload)
     activity_service.record_created(task.id, task.title)
     return task

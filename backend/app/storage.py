@@ -39,6 +39,15 @@ def list_tasks(
     status: Optional[TaskStatus] = None,
     priority: Optional[TaskPriority] = None,
 ) -> list[Task]:
+    """Load tasks from ``tasks.json``, optionally filtered.
+
+    Args:
+        status: If set, keep only tasks with this status.
+        priority: If set, keep only tasks with this priority.
+
+    Returns:
+        list[Task]: Matching tasks in storage file order. [VERIFY] not sorted.
+    """
     tasks = [Task.model_validate(item) for item in _load_tasks()]
 
     if status is not None:
@@ -51,6 +60,14 @@ def list_tasks(
 
 
 def get_task(task_id: int) -> Task | None:
+    """Return a task by integer id, or None if missing.
+
+    Args:
+        task_id: Task id to look up.
+
+    Returns:
+        Task | None: Matching task, or None when not found.
+    """
     for item in _load_tasks():
         if item.get("id") == task_id:
             return Task.model_validate(item)
@@ -58,6 +75,14 @@ def get_task(task_id: int) -> Task | None:
 
 
 def create_task(payload: TaskCreate) -> Task:
+    """Persist a new task with the next id and UTC timestamps.
+
+    Args:
+        payload: Client-provided task fields.
+
+    Returns:
+        Task: Newly stored task.
+    """
     tasks = _load_tasks()
     next_id = max((item["id"] for item in tasks), default=0) + 1
     now = _utc_now()
@@ -80,6 +105,16 @@ def _as_int_id(task_id: int | str) -> int | None:
 
 
 def update_task(task_id: int | str, payload: TaskUpdate) -> Task | None:
+    """Apply set fields from ``payload`` to a task and bump ``updated_at``.
+
+    Args:
+        task_id: Task id (non-integer values yield None).
+        payload: Partial update; unset fields are left unchanged.
+
+    Returns:
+        Task | None: Updated task, existing task if no fields set, or None if
+        missing / invalid id.
+    """
     parsed_id = _as_int_id(task_id)
     if parsed_id is None:
         return None
@@ -103,6 +138,14 @@ def update_task(task_id: int | str, payload: TaskUpdate) -> Task | None:
 
 
 def delete_task(task_id: int | str) -> bool:
+    """Remove a task by id.
+
+    Args:
+        task_id: Task id (non-integer values yield False).
+
+    Returns:
+        bool: True if a row was removed; False if missing or id not an int.
+    """
     parsed_id = _as_int_id(task_id)
     if parsed_id is None:
         return False
@@ -117,6 +160,14 @@ def delete_task(task_id: int | str) -> bool:
 
 # Compatibility aliases used by existing routes/tests
 def add_task(payload: TaskCreate) -> Task:
+    """Compatibility alias for ``create_task``.
+
+    Args:
+        payload: Client-provided task fields.
+
+    Returns:
+        Task: Newly stored task.
+    """
     return create_task(payload)
 
 
@@ -124,10 +175,27 @@ def get_all_tasks(
     status: Optional[TaskStatus] = None,
     priority: Optional[TaskPriority] = None,
 ) -> list[Task]:
+    """Compatibility alias for ``list_tasks``.
+
+    Args:
+        status: Optional status filter.
+        priority: Optional priority filter.
+
+    Returns:
+        list[Task]: Matching tasks.
+    """
     return list_tasks(status=status, priority=priority)
 
 
 def get_task_by_id(task_id: int | str) -> Task | None:
+    """Resolve ``task_id`` to int and return ``get_task``.
+
+    Args:
+        task_id: Task id as int or digit string.
+
+    Returns:
+        Task | None: Matching task, or None if invalid/missing.
+    """
     parsed_id = _as_int_id(task_id)
     if parsed_id is None:
         return None

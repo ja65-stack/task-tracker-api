@@ -35,6 +35,14 @@ def _save_events(events: list[dict]) -> None:
 
 
 def list_events(task_id: int | None = None) -> list[ActivityEvent]:
+    """Load activity events, optionally filtered by task.
+
+    Args:
+        task_id: If set, keep only events for this task.
+
+    Returns:
+        list[ActivityEvent]: Events sorted newest ``created_at`` first.
+    """
     events = [ActivityEvent.model_validate(item) for item in _load_events()]
     if task_id is not None:
         events = [event for event in events if event.task_id == task_id]
@@ -49,6 +57,18 @@ def append_event(
     from_status: TaskStatus | None = None,
     to_status: TaskStatus | None = None,
 ) -> ActivityEvent:
+    """Append one activity event with the next id and UTC ``created_at``.
+
+    Args:
+        task_id: Related task id.
+        event_type: Event kind (created/updated/deleted/status_changed).
+        summary: Human-readable summary string.
+        from_status: Prior status for status_changed events; otherwise None.
+        to_status: New status for status_changed events; otherwise None.
+
+    Returns:
+        ActivityEvent: The persisted event.
+    """
     events = _load_events()
     next_id = max((item["id"] for item in events), default=0) + 1
     event = ActivityEvent(
