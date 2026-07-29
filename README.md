@@ -154,4 +154,5 @@ Workflow: `.github/workflows/ci.yml`
 
 - Mid-course decision note: [DECISION_NOTE.md](DECISION_NOTE.md)
 - Verification notes / pytest counts: [verification.md](verification.md)
+- Security review (Module 5): [docs/security-review.md](docs/security-review.md)
 - [VERIFY] No `docs/decisions/` directory exists in this repository.
