@@ -24,8 +24,8 @@ Primary application code lives under `backend/app/`. Frontend: `backend/frontend
 - Python / FastAPI / Uvicorn / Pydantic
 - pytest + httpx (TestClient)
 - JSON file storage (`backend/app/data/*.json`, gitignored)
-- Optional Docker image (`backend/Dockerfile`)
 - GitHub Actions CI (`.github/workflows/ci.yml`, Python 3.11)
+- Docker files exist (`backend/Dockerfile`, `backend/.dockerignore`); a working Docker engine is **optional / not confirmed** on every machine
 
 Dependencies are listed in `backend/requirements.txt` (unpinned versions).
 No `pyproject.toml` is present.
@@ -73,12 +73,14 @@ cd backend
 pytest -v
 ```
 
-Docker (README-supported; requires a working Docker engine):
+Docker (optional; **not confirmed** on every machine — needs a running Docker engine / virtualization):
 
 ```bash
 docker build -t task-tracker:dev ./backend
 docker run --rm -p 8000:8000 --name tt-dev task-tracker:dev
 ```
+
+Do not treat Docker as required for Module 5 work. Prefer local uvicorn + pytest unless the user explicitly asks for container checks.
 
 CI runs `pytest -v` in `backend/` on Python 3.11 for `push` and `pull_request`.
 
@@ -132,14 +134,14 @@ Same-status transitions are rejected (HTTP 422).
 - **Docs-first:** Prefer reading README, this file, models, routes, and tests before proposing edits.
 - **Read-only by default:** Inspect and explain first. Do not modify files unless the user explicitly asks for a change.
 - **One task per thread:** Complete one clear request at a time; do not expand into unrelated refactors.
-- **No `app/` changes unless explicitly approved:** Do not edit `backend/app/` (or equivalent application logic) without explicit user approval for that change.
+- **No `backend/app/` changes unless explicitly approved:** Do not edit files under `backend/app/` without explicit user approval for that change. Docs, tests, frontend, CI, and Docker files may still be changed when the user asks for them.
 - Keep Module 5 work scoped; do not add auth, databases, or deployment unless the user explicitly requires it.
 
 ## 5. Security and governance
 
 - Do **not** paste, commit, or expose secrets (API keys, tokens, passwords, private `.env` values).
 - `.env` is ignored for Docker builds; `.env.example` only shows non-secret placeholders (`PORT`, `APP_ENV`).
-- Do **not** run destructive commands (`rm -rf`, force-push, dropping data) unless the user explicitly requests them and the scope is clear.
+- Do **not** run destructive commands in this course repo (`rm -rf`, `git push --force`, resetting/wiping JSON data stores, deleting branches). If such a step seems necessary, stop and ask the user to do it locally.
 - Cite concrete files/paths (and line ranges when helpful) for claims about behavior.
 - Do **not** invent findings. If something is not visible in the repo, say **not confirmed**.
 - Prefer small, reviewable diffs over rewrites.
