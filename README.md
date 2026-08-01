@@ -156,4 +156,5 @@ Workflow: `.github/workflows/ci.yml`
 - Verification notes / pytest counts: [verification.md](verification.md)
 - Security review (Module 5): [docs/security-review.md](docs/security-review.md)
 - AI usage / code ownership (Module 5): [docs/ai-usage.md](docs/ai-usage.md)
-- [VERIFY] No `docs/decisions/` directory exists in this repository.
+- AI coding playbook (Module 5): [docs/ai-playbook.md](docs/ai-playbook.md)
+- Comments feature plan: [docs/decisions/comments-feature-plan.md](docs/decisions/comments-feature-plan.md)
