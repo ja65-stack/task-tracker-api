@@ -1,0 +1,20 @@
+{
+  "name": "Task Tracker API",
+  "install": "bash .cursor/install.sh",
+  "terminals": [
+    {
+      "name": "api",
+      "command": "cd backend && .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload",
+      "description": "FastAPI Task Tracker backend. API at http://localhost:8000, interactive docs at http://localhost:8000/docs."
+    },
+    {
+      "name": "frontend",
+      "command": "cd backend/frontend && python3 -m http.server 8001 --bind 0.0.0.0",
+      "description": "Static Kanban frontend at http://localhost:8001 (origin is allow-listed for CORS by the API)."
+    }
+  ],
+  "ports": [
+    { "name": "api", "port": 8000 },
+    { "name": "frontend", "port": 8001 }
+  ]
+}
