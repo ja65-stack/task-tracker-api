@@ -157,4 +157,6 @@ Workflow: `.github/workflows/ci.yml`
 - Security review (Module 5): [docs/security-review.md](docs/security-review.md)
 - AI usage / code ownership (Module 5): [docs/ai-usage.md](docs/ai-usage.md)
 - AI coding playbook (Module 5): [docs/ai-playbook.md](docs/ai-playbook.md)
+- Final AI review / ownership evidence (Module 5): [docs/final-ai-review.md](docs/final-ai-review.md)
 - Comments feature plan: [docs/decisions/comments-feature-plan.md](docs/decisions/comments-feature-plan.md)
+- Release evidence: [docs/release-evidence.md](docs/release-evidence.md)
