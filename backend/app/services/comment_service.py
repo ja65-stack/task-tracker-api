@@ -28,16 +28,53 @@ def _require_task(task_id: int) -> None:
 
 
 def list_comments(task_id: int) -> list[Comment]:
+    """List comments for an existing task.
+
+    Args:
+        task_id: Parent task id.
+
+    Returns:
+        list[Comment]: Comments for that task.
+
+    Raises:
+        TaskNotFoundError: If the task does not exist.
+    """
     _require_task(task_id)
     return comment_storage.list_comments_for_task(task_id)
 
 
 def add_comment(task_id: int, payload: CommentCreate) -> Comment:
+    """Create a comment after verifying the parent task exists.
+
+    Args:
+        task_id: Parent task id.
+        payload: Comment create payload.
+
+    Returns:
+        Comment: Persisted comment.
+
+    Raises:
+        TaskNotFoundError: If the task does not exist.
+    """
     _require_task(task_id)
     return comment_storage.create_comment(task_id, payload)
 
 
 def remove_comment(task_id: int, comment_id: int) -> None:
+    """Delete a comment owned by ``task_id``.
+
+    Args:
+        task_id: Parent task id.
+        comment_id: Comment id to remove.
+
+    Returns:
+        None
+
+    Raises:
+        TaskNotFoundError: If the task does not exist.
+        CommentNotFoundError: If the comment is missing or belongs to another
+            task.
+    """
     _require_task(task_id)
     comment = comment_storage.get_comment(comment_id)
     if comment is None or comment.task_id != task_id:

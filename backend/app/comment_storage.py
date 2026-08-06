@@ -35,6 +35,15 @@ def _save_comments(comments: list[dict]) -> None:
 
 
 def list_comments_for_task(task_id: int) -> list[Comment]:
+    """Return comments whose ``task_id`` matches.
+
+    Args:
+        task_id: Parent task id.
+
+    Returns:
+        list[Comment]: Matching comments in storage file order. [VERIFY] not
+        sorted by ``created_at``.
+    """
     return [
         Comment.model_validate(item)
         for item in _load_comments()
@@ -43,6 +52,14 @@ def list_comments_for_task(task_id: int) -> list[Comment]:
 
 
 def get_comment(comment_id: int) -> Comment | None:
+    """Return a comment by id, or None if missing.
+
+    Args:
+        comment_id: Comment id to look up.
+
+    Returns:
+        Comment | None: Matching comment, or None when not found.
+    """
     for item in _load_comments():
         if item.get("id") == comment_id:
             return Comment.model_validate(item)
@@ -50,6 +67,16 @@ def get_comment(comment_id: int) -> Comment | None:
 
 
 def create_comment(task_id: int, payload: CommentCreate) -> Comment:
+    """Append a comment with the next id and UTC ``created_at``.
+
+    Args:
+        task_id: Parent task id stored on the comment (caller must ensure the
+            task exists).
+        payload: Comment text.
+
+    Returns:
+        Comment: Persisted comment.
+    """
     comments = _load_comments()
     next_id = max((item["id"] for item in comments), default=0) + 1
     comment = Comment(
@@ -64,6 +91,14 @@ def create_comment(task_id: int, payload: CommentCreate) -> Comment:
 
 
 def delete_comment(comment_id: int) -> bool:
+    """Delete a comment by id.
+
+    Args:
+        comment_id: Comment id to remove.
+
+    Returns:
+        bool: True if removed; False if no matching id.
+    """
     comments = _load_comments()
     remaining = [item for item in comments if item.get("id") != comment_id]
     if len(remaining) == len(comments):

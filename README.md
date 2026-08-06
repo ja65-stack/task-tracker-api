@@ -1,114 +1,162 @@
-# Task Tracker API
+# Task Tracker API (Module 4)
 
-## Project Description
+## 1. Project overview
 
-Task Tracker is a learning project built with Python and FastAPI.
+Task Tracker is a **learning** FastAPI backend (Python 3.11) with JSON-file
+persistence — not a production deployment.
 
-The current implementation on branch `Mid-Course-Project` provides:
+Current capabilities (branch `Module_4`, based on mid-course work):
 
-- FastAPI task CRUD routes
-- Pydantic v2 task and comment models
-- JSON file persistence for tasks and comments
-- Task comment list/add/delete API
-- Activity log API (`GET /activity`, `GET /tasks/{id}/activity`) recorded on task create/update/delete/status change
-- A simple vanilla HTML/CSS/JS frontend (Kanban, edit modal with comments, global + per-task activity)
+- Task CRUD (`/tasks`, plus `PATCH /task/{id}` alias)
+- Comments per task
+- Activity log (`GET /activity`, `GET /tasks/{id}/activity`)
+- Health check at `GET /health`
+- Vanilla HTML/CSS/JS frontend under `backend/frontend/`
+- GitHub Actions CI and a multi-stage Docker image for the API
 
-## Project Structure
+This module does **not** add a database, auth, accounts, or cloud deployment.
 
-```
-backend/
-├── app/
-│   ├── main.py                 # FastAPI app + task routes
-│   ├── models.py               # Task + Comment Pydantic models
-│   ├── storage.py              # tasks.json helpers
-│   ├── comment_storage.py      # comments.json helpers
-│   ├── activity_storage.py     # activity.json helpers
-│   ├── business_rules.py
-│   ├── data/                   # local JSON data (gitignored)
-│   ├── routes/
-│   │   ├── comments.py         # comment list/add/delete routes
-│   │   └── activity.py         # GET /activity and per-task activity
-│   └── services/
-│       ├── comment_service.py
-│       └── activity_service.py
-├── frontend/
-│   └── index.html
-├── tests/
-└── requirements.txt
-```
+## 2. Prerequisites
 
-## How to run
+- Git
+- Python **3.11** (CI pins 3.11; [VERIFY] local minor versions may work)
+- `pip`
+- Optional: Docker (for container runs)
+- Optional: a second terminal for the static frontend
 
-Use branch `Mid-Course-Project`:
+## 3. Local setup
+
+From the **repository root**:
 
 ```bash
-git checkout Mid-Course-Project
-git pull origin Mid-Course-Project
+git checkout Module_4
+git pull origin Module_4
+cd backend
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-### 1. Backend (API)
+Dependencies (from `backend/requirements.txt`): FastAPI, Uvicorn, Pydantic,
+python-dotenv, pytest, httpx.
 
-From the repo root:
+## 4. Run the app locally
+
+From the **repository root**:
 
 ```bash
 cd backend
-py -m pip install -r requirements.txt
-py -m uvicorn app.main:app --reload
+uvicorn app.main:app --reload --port 8000
 ```
 
-If `py` is not found, try `python` or `python3` instead.
+[VERIFY] If `uvicorn` is not on your PATH, use:
+`python -m uvicorn app.main:app --reload --port 8000`.
 
-- API base: http://127.0.0.1:8000
-- Interactive docs: http://127.0.0.1:8000/docs
-- Health check: http://127.0.0.1:8000/health
+- API: http://127.0.0.1:8000
+- Docs: http://127.0.0.1:8000/docs
+- Health: http://127.0.0.1:8000/health
 
-Keep this terminal running while you use the frontend.
-
-### 2. Frontend
-
-In a **second** terminal, serve the frontend folder (example on port 8001):
+Optional frontend (second terminal, from repo root):
 
 ```bash
 cd backend/frontend
-py -m http.server 8001 --bind 127.0.0.1
+python -m http.server 8001 --bind 127.0.0.1
 ```
 
-Then open: http://127.0.0.1:8001/
+Open http://127.0.0.1:8001/ (calls the API at `http://127.0.0.1:8000`).
 
-The page calls the API at `http://127.0.0.1:8000`. CORS already allows origins on ports `8001` and `5500`.
+## 5. Run tests
 
-You can also open `backend/frontend/index.html` with VS Code/Cursor Live Server (port 5500).
-
-### 3. Tests
-
-With dependencies installed, from `backend/`:
+From the **repository root**:
 
 ```bash
 cd backend
-py -m pytest tests/ -q
+pytest -v
 ```
 
-Useful subsets:
+[VERIFY] If needed: `python -m pytest -v`.
+
+## 6. Run with Docker
+
+From the **repository root**:
 
 ```bash
-py -m pytest tests/test_comments.py tests/test_comments_baseline.py -q
-py -m pytest tests/test_comments_baseline.py -v
+docker build -t task-tracker:dev ./backend
+docker run --rm -p 8000:8000 --name tt-dev task-tracker:dev
 ```
 
-### Quick verification checklist
+Then: http://127.0.0.1:8000/health
 
-1. `http://127.0.0.1:8000/docs` shows **tasks** and **comments** endpoints
-2. Frontend board loads tasks from the API
-3. Edit a task → Comments panel lists/adds/deletes comments
-4. `py -m pytest tests/ -q` passes
+The image uses `python:3.11-slim`, runs as non-root user `app`, and starts
+`uvicorn app.main:app --host 0.0.0.0 --port 8000` (no `--reload`).
 
-### Viewing the `backend` folder in Explorer
+## 7. CI workflow summary
 
-The API code is under **`backend/`** at the repo root (next to `README.md`).
+Workflow: `.github/workflows/ci.yml`
 
-1. Open the **repository root** (`task-tracker-api`), not a subfolder.
-2. Or open **`task-tracker-api.code-workspace`** — Explorer then shows a top-level **backend** entry.
-3. **Agents Window:** `Ctrl+G` (Windows/Linux) or `Cmd+G` (Mac), then expand the repo root.
-4. If `backend` still does not appear: `Ctrl/Cmd+Shift+P` → **Developer: Reload Window**.
+- Triggers: `push`, `pull_request`
+- Python **3.11**
+- Installs `backend/requirements.txt`
+- Runs `pytest -v` in `backend/`
+- No deployment steps
 
-If you already opened the `backend` folder itself, Explorer will show `app/`, `tests/`, `frontend/` directly (there will be no nested folder named `backend`).
+## 8. Project structure
+
+```
+.
+├── .github/workflows/ci.yml
+├── DECISION_NOTE.md
+├── verification.md
+├── README.md
+└── backend/
+    ├── Dockerfile
+    ├── .dockerignore
+    ├── requirements.txt
+    ├── app/
+    │   ├── main.py              # FastAPI app + task routes + /health
+    │   ├── models.py
+    │   ├── storage.py
+    │   ├── comment_storage.py
+    │   ├── activity_storage.py
+    │   ├── business_rules.py
+    │   ├── data/                # local JSON (gitignored)
+    │   ├── routes/
+    │   │   ├── comments.py
+    │   │   └── activity.py
+    │   └── services/
+    │       ├── comment_service.py
+    │       └── activity_service.py
+    ├── frontend/
+    │   └── index.html
+    └── tests/
+```
+
+[VERIFY] `CLAUDE.md` was requested for this rewrite but is not in the repo.
+
+## 9. Project conventions and current limitations
+
+**Conventions**
+
+- JSON file storage (no ORM/DB)
+- Pydantic models validate request bodies
+- Status transitions are restricted (ToDo→InProgress→Done; Done→InProgress)
+- Activity events are recorded on successful create/update/delete/status change
+- Docker and CI target Python 3.11; container user is `app`
+
+**Limitations**
+
+- Not production-ready
+- No authentication or multi-user accounts
+- No relational database
+- No deployment pipeline in this module
+- Frontend is static and talks to `http://127.0.0.1:8000` only
+
+## 10. Technical notes
+
+- Mid-course decision note: [DECISION_NOTE.md](DECISION_NOTE.md)
+- Verification notes / pytest counts: [verification.md](verification.md)
+- Security review (Module 5): [docs/security-review.md](docs/security-review.md)
+- AI usage / code ownership (Module 5): [docs/ai-usage.md](docs/ai-usage.md)
+- AI coding playbook (Module 5): [docs/ai-playbook.md](docs/ai-playbook.md)
+- Final AI review / ownership evidence (Module 5): [docs/final-ai-review.md](docs/final-ai-review.md)
+- Comments feature plan: [docs/decisions/comments-feature-plan.md](docs/decisions/comments-feature-plan.md)
+- Release evidence: [docs/release-evidence.md](docs/release-evidence.md)
