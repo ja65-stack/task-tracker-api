@@ -145,6 +145,29 @@ def test_patch_same_status_is_noop_returns_200(client, created_task):
     assert body["status"] == "ToDo"
 
 
+def test_patch_description_with_same_inprogress_status_returns_200(client, created_task):
+    """Modal-style body: description change while resending current status."""
+    task_id = created_task["id"]
+    started = client.patch(f"/tasks/{task_id}", json={"status": "InProgress"})
+    assert started.status_code == 200
+
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={
+            "title": created_task["title"],
+            "description": "updated description only",
+            "status": "InProgress",
+            "priority": "Medium",
+            "assignee": None,
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["description"] == "updated description only"
+    assert body["status"] == "InProgress"
+
+
 def test_patch_task_alias_updates_task(client, created_task):
     task_id = created_task["id"]
 
