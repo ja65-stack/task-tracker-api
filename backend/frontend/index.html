@@ -1150,7 +1150,7 @@
 
     function openTaskModal(task) {
       activeTaskId = task.id;
-      originalEditStatus = task.status ?? 'ToDo';
+      originalEditStatus = String(task.status ?? 'ToDo');
       taskEditId.value = task.id;
       taskEditTitle.value = task.title ?? '';
       taskEditDescription.value = task.description ?? '';
@@ -1229,12 +1229,19 @@
         assignee: taskEditAssignee.value.trim() ? taskEditAssignee.value.trim() : null,
       };
 
-      // PATCH: only send status when it changed. Same-to-same is rejected by the API
-      // ("Invalid status transition from ToDo to ToDo"), which blocked title-only edits.
+      // PATCH must not resend the current status. The API rejects same-to-same
+      // transitions (e.g. "Invalid status transition from ToDo to ToDo"), which
+      // previously broke title-only edits when the form always included status.
       if (!taskId) {
         payload.status = taskEditStatus.value;
-      } else if (taskEditStatus.value !== originalEditStatus) {
-        payload.status = taskEditStatus.value;
+      } else {
+        const fromBoard = tasks.find(task => String(task.id) === String(taskId));
+        const baseline = originalEditStatus ?? fromBoard?.status ?? null;
+        const nextStatus = taskEditStatus.value;
+        if (baseline != null && nextStatus !== baseline) {
+          payload.status = nextStatus;
+        }
+        // If status is unchanged (or baseline unknown), leave it out of the body.
       }
 
       taskEditError.textContent = '';

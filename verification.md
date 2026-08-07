@@ -37,7 +37,7 @@ Notes on earlier incorrect counts:
 | Scenario | Result | Notes |
 |----------|--------|-------|
 | Board loads tasks from API | PASS | `GET /tasks` |
-| Edit title only on a ToDo task (status unchanged) → Save | **PASS (fixed)** | Previously **FAIL**: form always sent `status`, API returned `422 Invalid status transition from ToDo to ToDo`. Fix: PATCH omits `status` unless it changed. |
+| Edit title only on a ToDo task (status unchanged) → Save | **PASS (fixed)** | Previously **FAIL**: form always sent `status`, API returned `422 Invalid status transition from ToDo to ToDo`. Fix in `backend/frontend/index.html`: PATCH omits `status` unless it differs from the status when the modal opened (baseline from `originalEditStatus` / board task). Re-hardened on `final-project` (2026-08-07). If you still see the 422, hard-refresh the frontend so you are not on a cached `index.html`. |
 | Edit with a real status change → Save | PASS | Status included only when different from original |
 | Comments list / add / delete in modal | PASS | |
 | Global Activity panel + per-task activity | PASS | Deletes appear on global feed; per-task feed 404s after delete |
