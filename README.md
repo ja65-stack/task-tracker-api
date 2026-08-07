@@ -1,20 +1,20 @@
-# Task Tracker API (Module 4)
+# Task Tracker API (final-project)
 
 ## 1. Project overview
 
 Task Tracker is a **learning** FastAPI backend (Python 3.11) with JSON-file
 persistence — not a production deployment.
 
-Current capabilities (branch `Module_4`, based on mid-course work):
+Current capabilities (branch `final-project`):
 
 - Task CRUD (`/tasks`, plus `PATCH /task/{id}` alias)
 - Comments per task
 - Activity log (`GET /activity`, `GET /tasks/{id}/activity`)
 - Health check at `GET /health`
-- Vanilla HTML/CSS/JS frontend under `backend/frontend/`
+- Vanilla HTML/CSS/JS frontend under `frontend/`
 - GitHub Actions CI and a multi-stage Docker image for the API
 
-This module does **not** add a database, auth, accounts, or cloud deployment.
+This project does **not** add a database, auth, accounts, or cloud deployment.
 
 ## 2. Prerequisites
 
@@ -29,14 +29,13 @@ This module does **not** add a database, auth, accounts, or cloud deployment.
 From the **repository root**:
 
 ```bash
-git checkout Module_4
-git pull origin Module_4
-cd backend
+git checkout final-project
+git pull origin final-project
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Dependencies (from `backend/requirements.txt`): FastAPI, Uvicorn, Pydantic,
+Dependencies (from `requirements.txt`): FastAPI, Uvicorn, Pydantic,
 python-dotenv, pytest, httpx.
 
 ## 4. Run the app locally
@@ -44,7 +43,6 @@ python-dotenv, pytest, httpx.
 From the **repository root**:
 
 ```bash
-cd backend
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -58,7 +56,7 @@ uvicorn app.main:app --reload --port 8000
 Optional frontend (second terminal, from repo root):
 
 ```bash
-cd backend/frontend
+cd frontend
 python -m http.server 8001 --bind 127.0.0.1
 ```
 
@@ -69,7 +67,6 @@ Open http://127.0.0.1:8001/ (calls the API at `http://127.0.0.1:8000`).
 From the **repository root**:
 
 ```bash
-cd backend
 pytest -v
 ```
 
@@ -80,7 +77,7 @@ pytest -v
 From the **repository root**:
 
 ```bash
-docker build -t task-tracker:dev ./backend
+docker build -t task-tracker:dev .
 docker run --rm -p 8000:8000 --name tt-dev task-tracker:dev
 ```
 
@@ -95,8 +92,8 @@ Workflow: `.github/workflows/ci.yml`
 
 - Triggers: `push`, `pull_request`
 - Python **3.11**
-- Installs `backend/requirements.txt`
-- Runs `pytest -v` in `backend/`
+- Installs `requirements.txt` from the repository root
+- Runs `pytest -v` from the repository root
 - No deployment steps
 
 ## 8. Project structure
@@ -104,33 +101,32 @@ Workflow: `.github/workflows/ci.yml`
 ```
 .
 ├── .github/workflows/ci.yml
+├── Dockerfile
+├── .dockerignore
+├── requirements.txt
+├── AGENTS.md
 ├── DECISION_NOTE.md
 ├── verification.md
 ├── README.md
-└── backend/
-    ├── Dockerfile
-    ├── .dockerignore
-    ├── requirements.txt
-    ├── app/
-    │   ├── main.py              # FastAPI app + task routes + /health
-    │   ├── models.py
-    │   ├── storage.py
-    │   ├── comment_storage.py
-    │   ├── activity_storage.py
-    │   ├── business_rules.py
-    │   ├── data/                # local JSON (gitignored)
-    │   ├── routes/
-    │   │   ├── comments.py
-    │   │   └── activity.py
-    │   └── services/
-    │       ├── comment_service.py
-    │       └── activity_service.py
-    ├── frontend/
-    │   └── index.html
-    └── tests/
+├── docs/
+├── app/
+│   ├── main.py              # FastAPI app + task routes + /health
+│   ├── models.py
+│   ├── storage.py
+│   ├── comment_storage.py
+│   ├── activity_storage.py
+│   ├── business_rules.py
+│   ├── data/                # local JSON (gitignored)
+│   ├── routes/
+│   │   ├── comments.py
+│   │   └── activity.py
+│   └── services/
+│       ├── comment_service.py
+│       └── activity_service.py
+├── frontend/
+│   └── index.html
+└── tests/
 ```
-
-[VERIFY] `CLAUDE.md` was requested for this rewrite but is not in the repo.
 
 ## 9. Project conventions and current limitations
 
@@ -139,6 +135,7 @@ Workflow: `.github/workflows/ci.yml`
 - JSON file storage (no ORM/DB)
 - Pydantic models validate request bodies
 - Status transitions are restricted (ToDo→InProgress→Done; Done→InProgress)
+- Same-status on PATCH is a no-op (HTTP 200)
 - Activity events are recorded on successful create/update/delete/status change
 - Docker and CI target Python 3.11; container user is `app`
 

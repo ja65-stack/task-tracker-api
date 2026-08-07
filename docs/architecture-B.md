@@ -21,7 +21,7 @@ Statuses/priorities and allowed transitions live in `app/models.py` and `app/bus
 
 1. UI (or client) `POST`s a create payload to `/tasks` on the API (`:8000`).
 2. Pydantic validates create fields (`extra="forbid"`; title rules; enum defaults).
-3. On success, the task is persisted to `backend/app/data/tasks.json` with a server-assigned integer id.
+3. On success, the task is persisted to `app/data/tasks.json` with a server-assigned integer id.
 4. An activity event is recorded for the successful create (`app/main.py` + activity service).
 5. API returns the created task; the Kanban UI refreshes from task list endpoints. Frontend is typically served on `:8001` and calls `http://127.0.0.1:8000`.
 
@@ -30,23 +30,23 @@ Statuses/priorities and allowed transitions live in `app/models.py` and `app/bus
 | File | Role |
 |------|------|
 | `AGENTS.md` | Agent/project conventions and confirmed stack |
-| `backend/app/main.py` | App entry; wires routes; activity hooks on successful writes |
-| `backend/app/models.py` | Task/comment (and related) validation and enums |
-| `backend/app/business_rules.py` | Allowed status transition pairs |
-| `backend/app/storage.py` | Task JSON persistence |
-| `backend/app/data/*.json` | `tasks.json`, `comments.json`, `activity.json` (gitignored) |
-| `backend/frontend/index.html` | Kanban + edit modal; omits unchanged status on PATCH |
-| `backend/requirements.txt` | Unpinned Python deps |
-| `.github/workflows/ci.yml` | CI: Python 3.11, `pytest -v` in `backend/` |
+| `app/main.py` | App entry; wires routes; activity hooks on successful writes |
+| `app/models.py` | Task/comment (and related) validation and enums |
+| `app/business_rules.py` | Allowed status transition pairs |
+| `app/storage.py` | Task JSON persistence |
+| `app/data/*.json` | `tasks.json`, `comments.json`, `activity.json` (gitignored) |
+| `frontend/index.html` | Kanban + edit modal; omits unchanged status on PATCH |
+| `requirements.txt` | Unpinned Python deps |
+| `.github/workflows/ci.yml` | CI: Python 3.11, `pytest -v` in `./` (repo root) |
 
 ## 5. Conventions
 
 - **Validation:** Title/comment text strip + blank reject; title max 200; unknown create/update fields forbidden; invalid enums → typically HTTP 422.
 - **Status:** Only `ToDo→InProgress`, `InProgress→Done`, `Done→InProgress`; same-status and `ToDo→Done` → 422. Frontend omits `status` from PATCH unless it changed (`originalEditStatus`).
-- **Storage:** JSON files under `backend/app/data/`; integer task ids; no ORM.
+- **Storage:** JSON files under `app/data/`; integer task ids; no ORM.
 - **Errors:** Transition/validation failures → 422; missing resources handled as not-found style HTTP errors (exact detail strings: see routes when implementing).
 - **Frontend/backend:** Separate static frontend; CORS-friendly local origins; API on 8000, UI often on 8001.
-- **Ops:** Optional Docker; CI on push/PR; run Python tools with cwd `backend/`.
+- **Ops:** Optional Docker; CI on push/PR; run Python tools with cwd `./` (repo root).
 
 ## 6. Not visible or assumptions
 

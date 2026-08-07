@@ -10,10 +10,10 @@ Activity Log, CI, and docs.
 
 - Repo-specific stack and commands included: **yes** (FastAPI/Pydantic/pytest,
   JSON files, CI Python 3.11, optional Docker, run/test commands with cwd
-  `backend/`)
+  `./` (repo root))
 - Docs-first/read-first guardrail included: **yes** (docs-first; read-only by
   default; inspect before edits)
-- Unexpected app/frontend edits rule included: **yes** (no `backend/app/`
+- Unexpected app/frontend edits rule included: **yes** (no `app/`
   changes unless explicitly approved; Module 5 scope; no inventing findings)
 
 ## AI code review mini-log
@@ -30,7 +30,7 @@ Activity Log, CI, and docs.
 
 | Finding | File evidence | Grade: Valid / False Positive / Noise | Reason | Next action |
 |---|---|---|---|---|
-| S1 — unbounded `description` / `assignee` / comment `text` | `backend/app/models.py` | Valid (open residual) | Title capped at 200; other strings not | Accept for course or add max_length only if approved |
+| S1 — unbounded `description` / `assignee` / comment `text` | `app/models.py` | Valid (open residual) | Title capped at 200; other strings not | Accept for course or add max_length only if approved |
 | S2 — no authentication | `main.py`, comment/activity routes, README, AGENTS | Valid course-scope residual | Learning app by design | Keep local-only; do not publish without auth design |
 | S3 — unpinned dependencies | `requirements.txt`, CI install step | Valid residual / Noise if treated as “critical vuln” | Drift risk, not an exploit by itself | Accept unless pinning required |
 | S4 — non-root `USER app` may block JSON writes | `Dockerfile`, storage under `app/data/` | Valid concern; **not live-verified** | No Docker engine in evidence pass | Verify when Docker works; fix ownership only if writes fail |
@@ -65,7 +65,7 @@ unchanged `status` (`originalEditStatus`).
 
 1. Never paste: credentials, tokens, private `.env` values, or identifying
    personal paths (e.g. full `C:\Users\…`).
-2. Always verify: CI critical lines (`working-directory: backend`, quoted
+2. Always verify: CI critical lines (`working-directory: .  # repo root (layout flattened)`, quoted
    `"3.11"`, `pytest -v` must fail the job) and any claim against files or a
    failing signal before I accept a fix.
 3. Record AI contributions by: ownership notes in `docs/ai-usage.md`, the

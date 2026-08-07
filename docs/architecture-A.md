@@ -27,22 +27,22 @@ Write DTOs: `TaskCreate`, `TaskUpdate` (`extra="forbid"`). Response alias: `Task
 1. Frontend (`index.html`) `POST`s JSON to `http://localhost:8000/tasks` (New Task modal).
 2. FastAPI validates body as `TaskCreate` (Pydantic); invalid → `422`.
 3. `main.create_task` calls `storage.add_task` / `create_task`.
-4. Storage loads `backend/app/data/tasks.json`, assigns next `id`, sets timestamps, appends, saves.
+4. Storage loads `app/data/tasks.json`, assigns next `id`, sets timestamps, appends, saves.
 5. API returns `201` with full `Task` JSON; UI refreshes the board via `GET /tasks`.
 
 ## 4. Key files
 
 | File | Role |
 |------|------|
-| `backend/app/main.py` | FastAPI app, CORS, all live HTTP routes |
-| `backend/app/models.py` | Pydantic Task models + title validation |
-| `backend/app/storage.py` | JSON load/save CRUD for tasks |
-| `backend/app/business_rules.py` | Allowed status transitions on PATCH |
-| `backend/app/data/tasks.json` | On-disk task list |
-| `backend/frontend/index.html` | Kanban UI + modal + `fetch` client |
-| `backend/tests/conftest.py` | Temp `tasks.json` + TestClient fixtures |
-| `backend/tests/test_tasks.py` | API contract tests |
-| `README.md` | Run instructions (`uvicorn` from `backend/`) |
+| `app/main.py` | FastAPI app, CORS, all live HTTP routes |
+| `app/models.py` | Pydantic Task models + title validation |
+| `app/storage.py` | JSON load/save CRUD for tasks |
+| `app/business_rules.py` | Allowed status transitions on PATCH |
+| `app/data/tasks.json` | On-disk task list |
+| `frontend/index.html` | Kanban UI + modal + `fetch` client |
+| `tests/conftest.py` | Temp `tasks.json` + TestClient fixtures |
+| `tests/test_tasks.py` | API contract tests |
+| `README.md` | Run instructions (`uvicorn` from `./` (repo root)) |
 
 ## 5. Conventions
 

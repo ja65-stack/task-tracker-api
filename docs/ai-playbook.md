@@ -9,10 +9,10 @@ How I use AI on Task Tracker.
 - I’m comparing two choices—e.g. I compared the generic comments plan, the repo-grounded plan, and what Mid-Course actually shipped (`text` + int ids + delete vs `author`/`body`/UUID).
 
 ## 2. When I do not reach for AI
-- Tiny edits I already understand—e.g. stop sending unchanged `status` on PATCH (`originalEditStatus` in `backend/frontend/index.html`) after same-to-same `ToDo → ToDo` returned 422.
+- Tiny edits I already understand—e.g. stop sending unchanged `status` on PATCH (`originalEditStatus` in `frontend/index.html`) after same-to-same `ToDo → ToDo` returned 422.
 
 ## 3. My non-negotiables
-- I never commit AI-generated code I haven’t reviewed and can’t explain—e.g. Module 5 CI ownership: `working-directory: backend`, quoted `"3.11"`, and `pytest -v` in `.github/workflows/ci.yml` before calling CI “done” (`docs/ai-usage.md`).
+- I never commit AI-generated code I haven’t reviewed and can’t explain—e.g. Module 5 CI ownership: `working-directory: .  # repo root (layout flattened)`, quoted `"3.11"`, and `pytest -v` in `.github/workflows/ci.yml` before calling CI “done” (`docs/ai-usage.md`).
 - I reproduce a failing test or exact error before asking AI for a fix—e.g. title-only edit → 422 `Invalid status transition from ToDo to ToDo`, then the PATCH omit-status fix.
 
 ## 4. My review rules

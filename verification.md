@@ -7,7 +7,6 @@ Evidence from an actual pytest run and frontend checks for Comments + Activity L
 Command:
 
 ```bash
-cd backend
 python3 -m pytest tests/ -q
 ```
 
@@ -30,7 +29,7 @@ Notes on earlier incorrect counts:
 - A later draft claimed **59** while also listing activity rows in a way that did not match the table total (**69**).
 - Current collected/run total is **73** (`14+11+8+1+8+12+19`).
 
-`backend/tests/Verify_a.py` is a manual script and is **not** collected by pytest.
+`tests/Verify_a.py` is a manual script and is **not** collected by pytest.
 
 ## Frontend verification
 

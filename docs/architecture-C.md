@@ -1,6 +1,6 @@
 # Task Tracker — Architecture (Strategy C)
 
-Scope: only `backend/app/main.py`, `backend/app/models.py`, `backend/app/storage.py`.
+Scope: only `app/main.py`, `app/models.py`, `app/storage.py`.
 
 ## 1. What the app does
 
@@ -34,11 +34,11 @@ DTOs: `TaskCreate` / `TaskUpdate` with `extra="forbid"`. `TaskResponse = Task`.
 
 | File | Role (only as referenced/read) |
 |------|--------------------------------|
-| `backend/app/main.py` | FastAPI app, CORS, health + task routes |
-| `backend/app/models.py` | Task enums, entities, create/update DTOs |
-| `backend/app/storage.py` | JSON-file task CRUD |
-| `backend/app/data/tasks.json` | Persistence path used by storage |
-| `backend/app/business_rules.py` | Imported for `validate_status_transition` on PATCH |
+| `app/main.py` | FastAPI app, CORS, health + task routes |
+| `app/models.py` | Task enums, entities, create/update DTOs |
+| `app/storage.py` | JSON-file task CRUD |
+| `app/data/tasks.json` | Persistence path used by storage |
+| `app/business_rules.py` | Imported for `validate_status_transition` on PATCH |
 
 Other project files (frontend, tests, README, comments/activity modules): **not visible from the files I read.**
 

@@ -15,7 +15,7 @@ vanilla HTML/CSS/JS frontend. It supports:
 This is **not** a production system. There is **no** auth, accounts, relational
 database, or deployment pipeline in the current codebase.
 
-Primary application code lives under `backend/app/`. Frontend: `backend/frontend/index.html`.
+Primary application code lives under `app/`. Frontend: `frontend/index.html`.
 
 ## 2. Tech stack and supported commands
 
@@ -23,11 +23,11 @@ Primary application code lives under `backend/app/`. Frontend: `backend/frontend
 
 - Python / FastAPI / Uvicorn / Pydantic
 - pytest + httpx (TestClient)
-- JSON file storage (`backend/app/data/*.json`, gitignored)
+- JSON file storage (`app/data/*.json`, gitignored)
 - GitHub Actions CI (`.github/workflows/ci.yml`, Python 3.11)
-- Docker files exist (`backend/Dockerfile`, `backend/.dockerignore`); a working Docker engine is **optional / not confirmed** on every machine
+- Docker files exist (`Dockerfile`, `.dockerignore`); a working Docker engine is **optional / not confirmed** on every machine
 
-Dependencies are listed in `backend/requirements.txt` (unpinned versions).
+Dependencies are listed in `requirements.txt` (unpinned versions).
 No `pyproject.toml` is present.
 
 ### Run / test commands (from repository root)
@@ -35,7 +35,6 @@ No `pyproject.toml` is present.
 Install:
 
 ```bash
-cd backend
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
@@ -43,14 +42,12 @@ pip install -r requirements.txt
 Run API (README-supported):
 
 ```bash
-cd backend
 uvicorn app.main:app --reload --port 8000
 ```
 
 If `uvicorn` is not on PATH (not confirmed on every machine):
 
 ```bash
-cd backend
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
@@ -60,29 +57,28 @@ python -m uvicorn app.main:app --reload --port 8000
 Frontend (optional second terminal):
 
 ```bash
-cd backend/frontend
+cd frontend
 python -m http.server 8001 --bind 127.0.0.1
 ```
 
-Frontend calls `http://127.0.0.1:8000` (`baseUrl` in `backend/frontend/index.html`).
+Frontend calls `http://127.0.0.1:8000` (`baseUrl` in `frontend/index.html`).
 
 Tests (README + CI):
 
 ```bash
-cd backend
 pytest -v
 ```
 
 Docker (optional; **not confirmed** on every machine — needs a running Docker engine / virtualization):
 
 ```bash
-docker build -t task-tracker:dev ./backend
+docker build -t task-tracker:dev .
 docker run --rm -p 8000:8000 --name tt-dev task-tracker:dev
 ```
 
 Do not treat Docker as required for Module 5 work. Prefer local uvicorn + pytest unless the user explicitly asks for container checks.
 
-CI runs `pytest -v` in `backend/` on Python 3.11 for `push` and `pull_request`.
+CI runs `pytest -v` in `./` (repo root) on Python 3.11 for `push` and `pull_request`.
 
 ## 3. Business rules visible in code
 
@@ -120,22 +116,22 @@ current status do not fail; only real transitions are validated.
 
 ### Persistence (`app/storage.py` and related)
 
-- Tasks: `backend/app/data/tasks.json`
-- Comments: `backend/app/data/comments.json`
-- Activity: `backend/app/data/activity.json`
+- Tasks: `app/data/tasks.json`
+- Comments: `app/data/comments.json`
+- Activity: `app/data/activity.json`
 - Task ids are integers (server-assigned)
 - Activity events recorded on successful create / update / delete / status change (`app/main.py` + activity service)
 
 ### Frontend note (visible)
 
-- Edit modal omits `status` from PATCH unless the status value actually changed (`originalEditStatus` in `backend/frontend/index.html`), because the API rejects same-to-same status transitions.
+- Edit modal omits `status` from PATCH unless the status value actually changed (`originalEditStatus` in `frontend/index.html`), because the API rejects same-to-same status transitions.
 
 ## 4. Module 5 guardrails
 
 - **Docs-first:** Prefer reading README, this file, models, routes, and tests before proposing edits.
 - **Read-only by default:** Inspect and explain first. Do not modify files unless the user explicitly asks for a change.
 - **One task per thread:** Complete one clear request at a time; do not expand into unrelated refactors.
-- **No `backend/app/` changes unless explicitly approved:** Do not edit files under `backend/app/` without explicit user approval for that change. Docs, tests, frontend, CI, and Docker files may still be changed when the user asks for them.
+- **No `app/` changes unless explicitly approved:** Do not edit files under `app/` without explicit user approval for that change. Docs, tests, frontend, CI, and Docker files may still be changed when the user asks for them.
 - Keep Module 5 work scoped; do not add auth, databases, or deployment unless the user explicitly requires it.
 
 ## 5. Security and governance
@@ -149,4 +145,4 @@ current status do not fail; only real transitions are validated.
 
 ## Working directory reminder
 
-Most Python commands must run with cwd `backend/` so `app.main:app` and `tests/` resolve correctly.
+Most Python commands must run with cwd `./` (repo root) so `app.main:app` and `tests/` resolve correctly.

@@ -15,10 +15,12 @@ venv/
 # IDE files
 .vscode/
 .idea/
+.vs/
 
 # OS files
 .DS_Store
 Thumbs.db
 
 # Local JSON task/comment/activity data (recreated automatically on first API run)
-backend/app/data/*.json
+app/data/*.json
+!app/data/.gitkeep

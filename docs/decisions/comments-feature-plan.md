@@ -9,18 +9,18 @@ Branch observed: `cursor/restore-pydantic-models-e2a8`. **No comments feature ex
 
 ### Existing patterns to mirror
 
-In `backend/app/models.py`:
+In `app/models.py`:
 
 - Persisted entity `Task` owns server fields (`id`, `created_at`, `updated_at`).
 - Write DTOs `TaskCreate` / `TaskUpdate` use `ConfigDict(extra="forbid")`.
 - String fields are normalized with strip + blank reject + max length via `@field_validator` (see `_normalize_title` / `TITLE_MAX_LENGTH = 200`).
 - `TaskResponse = Task` is the route response alias.
 
-`backend/app/schemas.py` is a stub (“schemas will be added…”). Live request/response models live in `models.py`, not `schemas.py`.
+`app/schemas.py` is a stub (“schemas will be added…”). Live request/response models live in `models.py`, not `schemas.py`.
 
 ### Proposed comment models (same file / same style)
 
-Add to `backend/app/models.py` (preferred over the empty `schemas.py`, unless the team decides to start using that stub):
+Add to `app/models.py` (preferred over the empty `schemas.py`, unless the team decides to start using that stub):
 
 | Model | Role | Fields |
 |-------|------|--------|
@@ -36,7 +36,7 @@ Add to `backend/app/models.py` (preferred over the empty `schemas.py`, unless th
 
 ### Fit with task identity (important mismatch)
 
-- Today `Task.id` is an **`int`**, assigned in `storage.create_task` as `max(id)+1` (`backend/app/storage.py`).
+- Today `Task.id` is an **`int`**, assigned in `storage.create_task` as `max(id)+1` (`app/storage.py`).
 - Spec wants comment `task_id` as a **string** reference.
 
 **Recommended shape:** store/expose `task_id` as a **string** that equals `str(task.id)` (e.g. `"3"`), and resolve the parent via existing `storage.get_task_by_id`, which already accepts `int | str` and parses with `_as_int_id`. Do **not** change `Task.id` to UUID for this feature.
@@ -45,17 +45,17 @@ Constants: e.g. `AUTHOR_MAX_LENGTH = 100`, `BODY_MAX_LENGTH = 2000` next to `TIT
 
 ### Persistence placement
 
-Today only `TASKS_FILE = …/data/tasks.json` exists. Prefer a **sibling file** for comments (keeps task documents unchanged and matches “JSON-file persistence” in README), e.g. `backend/app/data/comments.json`, with CRUD helpers in `backend/app/storage.py` (or a new `comment` section in the same module—storage is currently task-only and documented as “JSON-file persistence for tasks”).
+Today only `TASKS_FILE = …/data/tasks.json` exists. Prefer a **sibling file** for comments (keeps task documents unchanged and matches “JSON-file persistence” in README), e.g. `app/data/comments.json`, with CRUD helpers in `app/storage.py` (or a new `comment` section in the same module—storage is currently task-only and documented as “JSON-file persistence for tasks”).
 
 Nested `comments: []` inside each task object is possible but would force rewriting task records on every comment and complicate `delete_task` / partial updates; separate file fits current storage style better.
 
-`backend/app/services/task_service.py` and `backend/app/routes/tasks.py` are stubs; **live wiring is in `main.py` + `storage.py`**. Plan should follow that unless the team chooses to finally split routes.
+`app/services/task_service.py` and `app/routes/tasks.py` are stubs; **live wiring is in `main.py` + `storage.py`**. Plan should follow that unless the team chooses to finally split routes.
 
 ---
 
 ## 2. API Routes
 
-Register on the FastAPI app in `backend/app/main.py` (where all task routes live today), under a clear tag such as `comments`. CORS already allows `POST` / `GET` / `DELETE` from frontend origins (`http://127.0.0.1:8001`, etc.).
+Register on the FastAPI app in `app/main.py` (where all task routes live today), under a clear tag such as `comments`. CORS already allows `POST` / `GET` / `DELETE` from frontend origins (`http://127.0.0.1:8001`, etc.).
 
 ### MVP routes (aligned with existing task conventions)
 
@@ -94,17 +94,17 @@ Register on the FastAPI app in `backend/app/main.py` (where all task routes live
 
 No auth exists in this app (README: learning Module 1 CRUD). `author` is free text, like optional `assignee` on tasks—not a verified user.
 
-**Do not** add comment endpoints only in the stub `backend/app/routes/tasks.py` unless also wiring a router into `main.py` (currently unused).
+**Do not** add comment endpoints only in the stub `app/routes/tasks.py` unless also wiring a router into `main.py` (currently unused).
 
 ---
 
 ## 3. Tests
 
-Follow existing style: pytest + `TestClient` from `backend/tests/conftest.py`; autouse fixture resets `tasks.json` under `tmp_path`. **Extend that fixture** to also reset a comments file (monkeypatch `COMMENTS_FILE` the same way as `TASKS_FILE`).
+Follow existing style: pytest + `TestClient` from `tests/conftest.py`; autouse fixture resets `tasks.json` under `tmp_path`. **Extend that fixture** to also reset a comments file (monkeypatch `COMMENTS_FILE` the same way as `TASKS_FILE`).
 
-Naming mirrors `backend/tests/test_tasks.py` / `test_models.py` (`test_<action>_<condition>_returns_<status>`).
+Naming mirrors `tests/test_tasks.py` / `test_models.py` (`test_<action>_<condition>_returns_<status>`).
 
-Suggested new files: `backend/tests/test_comments.py` (API) and model cases either there or in `test_models.py`; storage helpers in `test_storage.py` or `test_comment_storage.py`.
+Suggested new files: `tests/test_comments.py` (API) and model cases either there or in `test_models.py`; storage helpers in `test_storage.py` or `test_comment_storage.py`.
 
 ### Happy path
 
@@ -141,7 +141,7 @@ Use the existing `created_task` fixture (or compose on it) so every comment test
 
 ## 4. Frontend Changes
 
-**File that would change:** `backend/frontend/index.html` only (single-page kanban; no other frontend modules observed).
+**File that would change:** `frontend/index.html` only (single-page kanban; no other frontend modules observed).
 
 **Current UX hooks:**
 
@@ -168,8 +168,8 @@ Use the existing `created_task` fixture (or compose on it) so every comment test
 
 ## 5. Migration Notes
 
-- Existing `backend/app/data/tasks.json` is currently `[]` in the tree; shape of each task has **no** comment fields. **Do not require rewriting historical task objects** if comments live in a separate `comments.json`.
-- New file `backend/app/data/comments.json` (or agreed name): initialize as `[]` when missing, same `_ensure_storage` pattern as tasks.
+- Existing `app/data/tasks.json` is currently `[]` in the tree; shape of each task has **no** comment fields. **Do not require rewriting historical task objects** if comments live in a separate `comments.json`.
+- New file `app/data/comments.json` (or agreed name): initialize as `[]` when missing, same `_ensure_storage` pattern as tasks.
 - `.gitignore` / data policy: confirm whether `app/data/*.json` is ignored locally (not fully visible from README alone beyond “Persisted tasks”); tests already avoid the real file via `tmp_path`.
 - `storage.delete_task` today only removes the task row. Implementers must define what happens to comments with that `task_id` (cascade delete recommended for file store consistency).
 - `conftest.py` must monkeypatch and reset the comments path; otherwise API tests will leak state or hit the wrong file.
@@ -184,7 +184,7 @@ Use the existing `created_task` fixture (or compose on it) so every comment test
 2. **Immutability:** Is MVP create+list only, or are edit/delete of comments in scope?
 3. **`task_id` type in JSON:** Store as string `"1"` always, or as JSON number `1` while typing the Pydantic field as `str` (coercion)? Need one canonical on-disk form for stable tests.
 4. **List sort:** Oldest-first (thread) vs newest-first?
-5. **Route layout:** Keep adding endpoints in `main.py`, or finally move task+comment routes into `backend/app/routes/` and include a router (stubs exist but are unused)?
+5. **Route layout:** Keep adding endpoints in `main.py`, or finally move task+comment routes into `app/routes/` and include a router (stubs exist but are unused)?
 6. **Models vs schemas:** Keep comment models in `models.py` (current convention) or start populating the empty `schemas.py`?
 7. **Activity / audit:** This branch has **no** activity log. Should creating a comment also write an activity event later, or stay comments-only?
 8. **Frontend base URL:** Code uses `http://localhost:8000`; CORS also allows `127.0.0.1`. Should comment work assume the same `baseUrl` quirk as tasks?
@@ -194,15 +194,15 @@ Use the existing `created_task` fixture (or compose on it) so every comment test
 ## Files read
 
 - `README.md`, `backend/README.md`
-- `backend/app/main.py`
-- `backend/app/models.py`
-- `backend/app/storage.py`
-- `backend/app/business_rules.py`
-- `backend/app/schemas.py`, `backend/app/validators.py`
-- `backend/app/routes/tasks.py`, `backend/app/services/task_service.py`
-- `backend/app/data/tasks.json`
-- `backend/tests/conftest.py`, `test_tasks.py`, `test_models.py`, `test_storage.py`, `test_health.py`
-- `backend/frontend/index.html`
+- `app/main.py`
+- `app/models.py`
+- `app/storage.py`
+- `app/business_rules.py`
+- `app/schemas.py`, `app/validators.py`
+- `app/routes/tasks.py`, `app/services/task_service.py`
+- `app/data/tasks.json`
+- `tests/conftest.py`, `test_tasks.py`, `test_models.py`, `test_storage.py`, `test_health.py`
+- `frontend/index.html`
 - Repo layout / branch via `git` (`AGENTS.md` **not present** on this branch)
 
 ---
@@ -215,7 +215,7 @@ Use the existing `created_task` fixture (or compose on it) so every comment test
 4. **Assumption:** Separate `comments.json` is preferred over nesting comments inside each task object.
 5. **Assumption:** MVP HTTP surface is `POST` + `GET` under `/tasks/{task_id}/comments`, matching how tasks nest by id in URLs today.
 6. **Assumption:** `task_id` on comments is the string form of the existing integer task id, not a new UUID for tasks.
-7. **Assumption:** Frontend work is confined to `backend/frontend/index.html` and attaches comments to the existing edit modal or card actions.
+7. **Assumption:** Frontend work is confined to `frontend/index.html` and attaches comments to the existing edit modal or card actions.
 8. **Assumption:** No authentication will gate `author`; it remains a required free-text field.
 9. **Assumption:** Test isolation will extend the existing `tmp_path` + monkeypatch pattern in `conftest.py` rather than introducing a DB or new test runner.
 10. **Unverified from files:** Whether local `app/data/*.json` is gitignored in all environments; only `tasks.json` content (`[]`) was observed. Confirm before relying on committed seed comment data.
