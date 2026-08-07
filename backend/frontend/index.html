@@ -1221,7 +1221,8 @@
         return;
       }
 
-      const taskId = taskEditId.value;
+      const taskId = String(taskEditId.value || '').trim();
+      const isEdit = taskId.length > 0;
       const payload = {
         title: trimmedTitle,
         description: taskEditDescription.value,
@@ -1229,26 +1230,24 @@
         assignee: taskEditAssignee.value.trim() ? taskEditAssignee.value.trim() : null,
       };
 
-      // PATCH must not resend the current status. The API rejects same-to-same
-      // transitions (e.g. "Invalid status transition from ToDo to ToDo"), which
-      // previously broke title-only edits when the form always included status.
-      if (!taskId) {
+      // Prefer omitting unchanged status on PATCH (avoids useless same-to-same
+      // status writes). Backend also treats same-status as a no-op.
+      if (!isEdit) {
         payload.status = taskEditStatus.value;
       } else {
-        const fromBoard = tasks.find(task => String(task.id) === String(taskId));
-        const baseline = originalEditStatus ?? fromBoard?.status ?? null;
-        const nextStatus = taskEditStatus.value;
-        if (baseline != null && nextStatus !== baseline) {
+        const fromBoard = tasks.find(task => String(task.id) === taskId);
+        const baseline = String(originalEditStatus ?? fromBoard?.status ?? '');
+        const nextStatus = String(taskEditStatus.value || '');
+        if (baseline && nextStatus && nextStatus !== baseline) {
           payload.status = nextStatus;
         }
-        // If status is unchanged (or baseline unknown), leave it out of the body.
       }
 
       taskEditError.textContent = '';
 
       try {
-        const response = await fetch(`${baseUrl}/${taskId ? `tasks/${encodeURIComponent(taskId)}` : 'tasks'}`, {
-          method: taskId ? 'PATCH' : 'POST',
+        const response = await fetch(`${baseUrl}/${isEdit ? `tasks/${encodeURIComponent(taskId)}` : 'tasks'}`, {
+          method: isEdit ? 'PATCH' : 'POST',
           headers: {
             'Content-Type': 'application/json',
           },

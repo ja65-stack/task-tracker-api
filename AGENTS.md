@@ -106,8 +106,9 @@ Allowed pairs only:
 - `InProgress` → `Done`
 - `Done` → `InProgress`
 
-Same-status transitions are rejected (HTTP 422).
 `ToDo` → `Done` is rejected (HTTP 422).
+Same-status on PATCH is a **no-op** (HTTP 200) so modal edits that resend the
+current status do not fail; only real transitions are validated.
 
 ### Validation (`app/models.py`)
 

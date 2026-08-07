@@ -13,7 +13,8 @@ def validate_status_transition(current: TaskStatus, new: TaskStatus) -> None:
     """Ensure ``current`` → ``new`` is an allowed status transition.
 
     Allowed pairs: ToDo→InProgress, InProgress→Done, Done→InProgress.
-    Same-status transitions are not allowed.
+    Callers should skip this helper when ``current == new`` (treated as a
+    no-op on PATCH). Other same-status pairs are not in ``VALID_TRANSITIONS``.
 
     Args:
         current: Existing task status.

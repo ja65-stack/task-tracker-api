@@ -137,8 +137,11 @@ def update_task(task_id: str, payload: TaskUpdate) -> TaskResponse:
     if not updates:
         return existing
 
-    if payload.status is not None:
-        validate_status_transition(existing.status, payload.status)
+    # Only validate real status changes. Same-to-same (e.g. InProgress →
+    # InProgress) is a no-op so modal edits that resend the current status
+    # (title/description-only) do not 422.
+    if "status" in updates and updates["status"] != existing.status:
+        validate_status_transition(existing.status, updates["status"])
 
     task = storage.update_task(task_id, payload)
     if task is None:

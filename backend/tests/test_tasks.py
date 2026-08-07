@@ -131,12 +131,18 @@ def test_patch_invalid_transition_todo_to_done_returns_422(client, created_task)
     assert response.status_code == 422
 
 
-def test_patch_same_status_returns_422(client, created_task):
+def test_patch_same_status_is_noop_returns_200(client, created_task):
     task_id = created_task["id"]
 
-    response = client.patch(f"/tasks/{task_id}", json={"status": "ToDo"})
+    response = client.patch(
+        f"/tasks/{task_id}",
+        json={"title": "title only", "status": "ToDo"},
+    )
 
-    assert response.status_code == 422
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "title only"
+    assert body["status"] == "ToDo"
 
 
 def test_patch_task_alias_updates_task(client, created_task):
