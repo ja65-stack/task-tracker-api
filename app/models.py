@@ -78,8 +78,12 @@ class TaskUpdate(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: str | None) -> str | None:
+        # Explicit JSON null must not clear title (would corrupt storage and
+        # break later GETs). Omit the field to leave title unchanged.
         if value is None:
-            return value
+            raise ValueError(
+                "Title cannot be null; omit title to leave it unchanged"
+            )
         return _normalize_title(value)
 
 

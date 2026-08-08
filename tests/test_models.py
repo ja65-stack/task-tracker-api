@@ -45,3 +45,9 @@ def test_task_update_rejects_blank_title_when_provided():
 def test_task_update_allows_omitted_title():
     task = TaskUpdate(status=TaskStatus.DONE)
     assert task.title is None
+    assert "title" not in task.model_dump(exclude_unset=True)
+
+
+def test_task_update_rejects_explicit_null_title():
+    with pytest.raises(ValidationError):
+        TaskUpdate(title=None)

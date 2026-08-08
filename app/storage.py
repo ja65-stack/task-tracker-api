@@ -128,11 +128,15 @@ def update_task(task_id: int | str, payload: TaskUpdate) -> Task | None:
         if not updates:
             return Task.model_validate(item)
 
-        item.update(updates)
-        item["updated_at"] = _utc_now().isoformat()
-        tasks[index] = item
+        # Validate before writing so a bad update cannot corrupt tasks.json
+        # and cascade 500s on later GET /tasks.
+        proposed = dict(item)
+        proposed.update(updates)
+        proposed["updated_at"] = _utc_now().isoformat()
+        validated = Task.model_validate(proposed)
+        tasks[index] = json.loads(validated.model_dump_json())
         _save_tasks(tasks)
-        return Task.model_validate(item)
+        return validated
 
     return None
 

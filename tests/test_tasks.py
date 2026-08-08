@@ -145,6 +145,28 @@ def test_patch_same_status_is_noop_returns_200(client, created_task):
     assert body["status"] == "ToDo"
 
 
+def test_patch_explicit_null_title_returns_422_and_list_still_works(
+    client, created_task
+):
+    task_id = created_task["id"]
+    original_title = created_task["title"]
+
+    response = client.patch(f"/tasks/{task_id}", json={"title": None})
+
+    assert response.status_code == 422
+
+    listed = client.get("/tasks")
+    assert listed.status_code == 200
+    body = listed.json()
+    assert len(body) == 1
+    assert body[0]["id"] == task_id
+    assert body[0]["title"] == original_title
+
+    single = client.get(f"/tasks/{task_id}")
+    assert single.status_code == 200
+    assert single.json()["title"] == original_title
+
+
 def test_patch_description_with_same_inprogress_status_returns_200(client, created_task):
     """Modal-style body: description change while resending current status."""
     task_id = created_task["id"]
