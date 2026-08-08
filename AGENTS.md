@@ -109,6 +109,7 @@ current status do not fail; only real transitions are validated.
 ### Validation (`app/models.py`)
 
 - Title required; blank/whitespace rejected; max length 200; stripped
+- PATCH must not send `title: null` (422); omit `title` to leave it unchanged
 - Create/Update models use `extra="forbid"` (unknown fields rejected)
 - Default create status: `ToDo`; default priority: `Medium`
 - Comment `text` required; blank/whitespace rejected; stripped
