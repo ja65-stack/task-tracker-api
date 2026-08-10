@@ -8,9 +8,9 @@
   (this evidence run used: `python3 -m uvicorn app.main:app --host 127.0.0.1 --port 8000`)
 - `/health` result: **PASS** — `GET http://127.0.0.1:8000/health` returned  
   `{"status":"ok","timestamp":"2026-08-06T15:41:02.727038+00:00"}` (2026-08-06 cloud agent run)
-- Frontend check: **PASS (prior recorded evidence)** — see [`verification.md`](../verification.md): board loads tasks; title-only edit fixed (`originalEditStatus` omits unchanged `status` after 422 `ToDo → ToDo`); comments list/add/delete in modal; global + per-task activity. Not re-driven in the browser in this 2026-08-06 evidence pass.
+- Frontend check: **PASS (prior recorded evidence)** — see [`verification.md`](verification.md): board loads tasks; title-only edit fixed (`originalEditStatus` omits unchanged `status` after 422 `ToDo → ToDo`); comments list/add/delete in modal; global + per-task activity. Not re-driven in the browser in this 2026-08-06 evidence pass.
 - Test command: `python3 -m pytest -v`
-- Test result: **73 passed**, 4 warnings, in 0.39s (2026-08-06). Matches [`verification.md`](../verification.md) total.
+- Test result: **73 passed**, 4 warnings, in 0.39s (2026-08-06). Matches [`verification.md`](verification.md) total.
 
 ## CI evidence
 

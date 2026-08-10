@@ -106,9 +106,9 @@ Workflow: `.github/workflows/ci.yml`
 ├── requirements.txt
 ├── AGENTS.md
 ├── DECISION_NOTE.md
-├── verification.md
 ├── README.md
 ├── docs/
+│   ├── verification.md
 ├── app/
 │   ├── main.py              # FastAPI app + task routes + /health
 │   ├── models.py
@@ -150,7 +150,7 @@ Workflow: `.github/workflows/ci.yml`
 ## 10. Technical notes
 
 - Mid-course decision note: [DECISION_NOTE.md](DECISION_NOTE.md)
-- Verification notes / pytest counts: [verification.md](verification.md)
+- Verification notes / pytest counts: [docs/verification.md](docs/verification.md)
 - Security review (Module 5): [docs/security-review.md](docs/security-review.md)
 - AI usage / code ownership (Module 5): [docs/ai-usage.md](docs/ai-usage.md)
 - AI coding playbook (Module 5): [docs/ai-playbook.md](docs/ai-playbook.md)
