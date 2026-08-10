@@ -109,6 +109,10 @@ Workflow: `.github/workflows/ci.yml`
 ├── README.md
 ├── docs/
 │   ├── verification.md
+│   ├── release-evidence.md
+│   ├── final-ai-review.md
+│   ├── ai-playbook.md
+│   └── ...
 ├── app/
 │   ├── main.py              # FastAPI app + task routes + /health
 │   ├── models.py
