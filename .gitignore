@@ -12,13 +12,23 @@ venv/
 # Testing
 .pytest_cache/
 
-# IDE files
+# IDE / local editor state (never commit)
 .vscode/
 .idea/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+slnx.sqlite
+*.code-workspace.bak
 
 # OS files
 .DS_Store
 Thumbs.db
 
 # Local JSON task/comment/activity data (recreated automatically on first API run)
-backend/app/data/*.json
+app/data/*.json
+!app/data/.gitkeep
