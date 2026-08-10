@@ -18,28 +18,26 @@ runners** (job `docker` in [`.github/workflows/ci.yml`](../.github/workflows/ci.
 
 ## Results
 
-- Date recorded: _______________
-- CI workflow run (green): _______________
-- Build: ☐ PASS / ☐ FAIL
-- Run + `/health`: ☐ PASS / ☐ FAIL
-- Non-root (`whoami` → `app`): ☐ PASS / ☐ FAIL
-- No-baked-secrets spot check: ☐ PASS / ☐ FAIL
-
-*(Fill the blanks after the first green `docker` job run; see
-[`release-evidence.md`](release-evidence.md).)*
+- Date recorded: **2026-08-10**
+- CI workflow run (green): https://github.com/ja65-stack/task-tracker-api/actions/runs/31381717024  
+  (also green on push https://github.com/ja65-stack/task-tracker-api/actions/runs/31381710678)
+- Build: ☑ PASS
+- Run + `/health`: ☑ PASS
+- Non-root (`whoami` → `app`): ☑ PASS
+- No-baked-secrets spot check: ☑ PASS
 
 ## Security notes (static + live)
 
 | Check | Evidence | Result |
 |-------|----------|--------|
-| Non-root process user | Dockerfile `USER app`; CI `whoami` | Declared in Dockerfile; live-confirmed in CI when job is green |
+| Non-root process user | Dockerfile `USER app`; CI `whoami` | **PASS** (live in Actions `docker` job) |
 | No `--reload` in production CMD | Dockerfile `CMD` uses uvicorn without `--reload` | PASS (static) |
-| `.env` not copied into image | `.dockerignore` has `.env` / `.env.*`; CI spot check | PASS when CI job is green |
+| `.env` not copied into image | `.dockerignore` has `.env` / `.env.*`; CI spot check | **PASS** (live) |
 | Image context excludes tests/frontend noise | `.dockerignore` lists `tests`, `frontend`, IDE folders | PASS (static) |
 | Listens on `0.0.0.0:8000` | Expected for containers; keep ports off untrusted networks | Accepted course-scope |
 
 ## Relation to local Windows Docker
 
 Local `docker build` / `docker run` remain valid when Docker Desktop +
-virtualization work. Until then, the **Actions `docker` job** is the
-authoritative live execution evidence for this course repo.
+virtualization work. The **Actions `docker` job** is the authoritative live
+execution evidence recorded for this course repo.
