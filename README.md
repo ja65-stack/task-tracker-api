@@ -91,10 +91,10 @@ The image uses `python:3.11-slim`, runs as non-root user `app`, and starts
 Workflow: `.github/workflows/ci.yml`
 
 - Triggers: `push`, `pull_request`
-- Python **3.11**
-- Installs `requirements.txt` from the repository root
-- Runs `pytest -v` from the repository root
+- Job `test`: Python **3.11**, install `requirements.txt`, run `pytest -v` (repo root)
+- Job `docker`: `docker build`, run container, curl `/health`, `whoami` → `app`, no-baked-`.env` spot check
 - No deployment steps
+- Docker verification log: [docs/docker-verification.md](docs/docker-verification.md)
 
 ## 8. Project structure
 
@@ -161,3 +161,4 @@ Workflow: `.github/workflows/ci.yml`
 - Final AI review / ownership evidence (Module 5): [docs/final-ai-review.md](docs/final-ai-review.md)
 - Comments feature plan: [docs/decisions/comments-feature-plan.md](docs/decisions/comments-feature-plan.md)
 - Release evidence: [docs/release-evidence.md](docs/release-evidence.md)
+- Docker verification / security log: [docs/docker-verification.md](docs/docker-verification.md)
