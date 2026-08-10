@@ -24,3 +24,53 @@ jobs:
 
       - name: Run tests
         run: pytest -v
+
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t task-tracker:ci .
+
+      - name: Run container
+        run: docker run -d --name tt-ci -p 8000:8000 task-tracker:ci
+
+      - name: Wait for /health
+        run: |
+          set -e
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:8000/health; then
+              echo
+              echo "health check passed on attempt $i"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "health check failed; container logs:" >&2
+          docker logs tt-ci >&2
+          exit 1
+
+      - name: Non-root user check
+        run: |
+          set -e
+          user=$(docker exec tt-ci whoami)
+          echo "container user=$user"
+          test "$user" = "app"
+
+      - name: No-baked-secrets spot check
+        run: |
+          set -e
+          # .dockerignore excludes .env / .env.*; fail if one slipped into the image.
+          if docker run --rm --entrypoint sh task-tracker:ci -c \
+            'test -f /app/.env -o -f /.env -o -f /build/.env'; then
+            echo "Unexpected .env file found in image" >&2
+            exit 1
+          fi
+          echo "No .env file at checked image paths"
+
+      - name: Stop container
+        if: always()
+        run: docker rm -f tt-ci
