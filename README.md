@@ -162,3 +162,76 @@ Workflow: `.github/workflows/ci.yml`
 - Comments feature plan: [docs/decisions/comments-feature-plan.md](docs/decisions/comments-feature-plan.md)
 - Release evidence: [docs/release-evidence.md](docs/release-evidence.md)
 - Docker verification / security log: [docs/docker-verification.md](docs/docker-verification.md)
+
+## Final Project
+
+Branch reviewed: **`final-project`**  
+https://github.com/ja65-stack/task-tracker-api/tree/final-project
+
+### What this submission demonstrates
+
+- Existing Task Tracker app still runs inside the intended course scope (tasks, comments, activity; no auth/DB/deploy).
+- CI runs the pytest suite on push and/or pull request (job `test`).
+- Docker image builds and runs with `/health` returning 200 (job `docker` on GitHub Actions).
+- AI review, security, and ownership evidence is in `docs/`.
+
+### How to run locally
+
+From the repository root:
+
+```bash
+git checkout final-project
+git pull origin final-project
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+If `uvicorn` is not on PATH: `python -m uvicorn app.main:app --reload --port 8000`.
+
+- API: http://127.0.0.1:8000  
+- Docs: http://127.0.0.1:8000/docs  
+- Health: http://127.0.0.1:8000/health  
+
+Optional frontend (second terminal):
+
+```bash
+cd frontend
+python -m http.server 8001 --bind 127.0.0.1
+```
+
+### How to run tests
+
+From the repository root:
+
+```bash
+pytest -v
+```
+
+### How to run with Docker
+
+From the repository root:
+
+```bash
+docker build -t task-tracker:dev .
+docker run --rm -p 8000:8000 --name tt-dev task-tracker:dev
+curl http://127.0.0.1:8000/health
+```
+
+Live CI Docker evidence (when local Docker Desktop/virtualization is unavailable):  
+https://github.com/ja65-stack/task-tracker-api/actions/runs/31381717024
+
+### Evidence files
+
+- [docs/release-evidence.md](docs/release-evidence.md)
+- [docs/final-ai-review.md](docs/final-ai-review.md)
+- [docs/ai-playbook.md](docs/ai-playbook.md)
+- Also: [docs/docker-verification.md](docs/docker-verification.md), [docs/security-review.md](docs/security-review.md), [docs/ai-usage.md](docs/ai-usage.md), [AGENTS.md](AGENTS.md)
+
+### AI assistance summary
+
+AI helped draft or review: **CI, Docker, docs, security review, debugging** (status PATCH / null-title), and Module 5 ownership notes.
+
+I verified the work by: **pytest**, **diff review**, **CI green runs** (including the `docker` job), **/health** checks, and **manual security scan** notes in `docs/`.
+
+One AI suggestion I rejected or corrected: treating Mid-Course comments as `author`/`body`/UUID instead of the shipped `text` + int ids + delete API; also rejected stale “no `docs/decisions/`” README VERIFY text after that folder existed.
